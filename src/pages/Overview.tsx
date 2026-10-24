@@ -24,6 +24,45 @@ export default function Overview() {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const navigate = useNavigate();
 
+  const totalAgents = agents.length;
+
+const runningAgents = agents.filter(
+  (agent) => agent.status === "Running",
+).length;
+
+const totalCompletedTasks = agents.reduce(
+  (total, agent) => total + agent.tasksCompleted,
+  0,
+);
+
+const dynamicStats = dashboardStats.map((stat) => {
+  switch (stat.title) {
+    case "Total Agents":
+      return {
+        ...stat,
+        value: String(totalAgents),
+        change: "Currently configured",
+      };
+
+    case "Active Agents":
+      return {
+        ...stat,
+        value: String(runningAgents),
+        change: "Currently running agents",
+      };
+
+    case "Total Executions":
+      return {
+        ...stat,
+        value: totalCompletedTasks.toLocaleString(),
+        change: "Completed tasks",
+      };
+
+    default:
+      return stat;
+  }
+});
+
   return (
     <DashboardLayout>
       <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
@@ -46,7 +85,7 @@ export default function Overview() {
       </div>
 
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {dashboardStats.map((stat) => (
+        {dynamicStats.map((stat) => (
           <StatCard key={stat.title} {...stat} />
         ))}
       </section>

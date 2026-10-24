@@ -19,6 +19,10 @@ type AgentContextValue = {
   createAgent: (input: CreateAgentInput) => void;
   deleteAgent: (id: number) => void;
   updateAgent: (id: number, input: UpdateAgentInput) => void;
+   updateAgentStatus: (
+    id: number,
+    status: Agent["status"],
+  ) => void;
 
 };
 
@@ -26,6 +30,19 @@ const AgentContext = createContext<AgentContextValue | null>(null);
 
 export function AgentProvider({ children }: { children: ReactNode }) {
   const [agents, setAgents] = useState<Agent[]>(initialAgents);
+
+  function updateAgentStatus(
+  id: number,
+  status: Agent["status"],
+) {
+  setAgents((current) =>
+    current.map((agent) =>
+      agent.id === id
+        ? { ...agent, status }
+        : agent,
+    ),
+  );
+}
 
   function createAgent(input: CreateAgentInput) {
     const newAgent: Agent = {
@@ -65,7 +82,7 @@ export function AgentProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AgentContext.Provider value={{ agents, createAgent, deleteAgent, updateAgent }}>
+    <AgentContext.Provider value={{ agents, createAgent, deleteAgent, updateAgent,updateAgentStatus }}>
       {children}
     </AgentContext.Provider>
   );

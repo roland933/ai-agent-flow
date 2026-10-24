@@ -1,4 +1,3 @@
-
 import {
   ArrowLeft,
   Bot,
@@ -7,6 +6,7 @@ import {
   Pencil,
   Play,
   Terminal,
+  Square,
 } from "lucide-react";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
 
@@ -29,7 +29,7 @@ const statusStyles: Record<string, string> = {
 export default function AgentDetails() {
   const { agentId } = useParams<{ agentId: string }>();
   const navigate = useNavigate();
-  const { agents } = useAgents();
+  const { agents, updateAgentStatus } = useAgents();
 
   const agent = agents.find((item) => item.id === Number(agentId));
 
@@ -59,17 +59,14 @@ export default function AgentDetails() {
 
               <span
                 className={`rounded-full px-3 py-1 text-xs ${
-                  statusStyles[agent.status] ??
-                  "bg-slate-500/10 text-slate-400"
+                  statusStyles[agent.status] ?? "bg-slate-500/10 text-slate-400"
                 }`}
               >
                 {agent.status}
               </span>
             </div>
 
-            <p className="mt-2 text-sm text-slate-400">
-              {agent.description}
-            </p>
+            <p className="mt-2 text-sm text-slate-400">{agent.description}</p>
           </div>
         </div>
 
@@ -84,12 +81,26 @@ export default function AgentDetails() {
           </button>
 
           <button
-            onClick={() => {
-              // Az agent futtatását később kötjük be.
-            }}
-            className="flex items-center gap-2 rounded-lg bg-violet-600 px-4 py-2.5 text-sm hover:bg-violet-500"
+            onClick={() =>
+              updateAgentStatus(
+                agent.id,
+                agent.status === "Running" ? "Idle" : "Running",
+              )
+            }
+            disabled={agent.status === "Error"}
+            className="flex items-center gap-2 rounded-lg bg-violet-600 px-4 py-2.5 text-sm text-white transition hover:bg-violet-500 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            <Play size={15} /> Run Agent
+            {agent.status === "Running" ? (
+              <>
+                <Square size={15} />
+                Stop Agent
+              </>
+            ) : (
+              <>
+                <Play size={15} />
+                Run Agent
+              </>
+            )}
           </button>
         </div>
       </div>
@@ -180,23 +191,22 @@ export default function AgentDetails() {
 
           <div className="space-y-3 rounded-lg bg-[#090f1a] p-4 font-mono text-xs">
             <p className="text-slate-400">
-              14:22:10 <span className="text-sky-400">INFO</span>{" "}
-              Starting research task...
+              14:22:10 <span className="text-sky-400">INFO</span> Starting
+              research task...
             </p>
 
             <p className="text-slate-400">
-              14:22:11 <span className="text-sky-400">INFO</span>{" "}
-              Searching available sources...
+              14:22:11 <span className="text-sky-400">INFO</span> Searching
+              available sources...
             </p>
 
             <p className="text-slate-400">
-              14:22:15 <span className="text-amber-400">DEBUG</span>{" "}
-              Processing source 1/12
+              14:22:15 <span className="text-amber-400">DEBUG</span> Processing
+              source 1/12
             </p>
 
             <p className="text-slate-400">
-              14:22:20 <span className="text-sky-400">INFO</span>{" "}
-              Progress: 60%
+              14:22:20 <span className="text-sky-400">INFO</span> Progress: 60%
             </p>
           </div>
         </section>
