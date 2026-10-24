@@ -1,9 +1,9 @@
 
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { AgentProvider } from "@/context/AgentContext";
-import Overview from "@/pages/Overview";
-import AgentDetails from "@/pages/AgentDetails";
-import AgentsPage from "@/pages/AgentsPage";
+import Overview from "@/features/overview/pages/Overview";
+import AgentDetails from "@/features/agents/pages/AgentDetails";
+import AgentsPage from "@/features/agents/pages/AgentsPage";
 
 export default function App() {
   return (

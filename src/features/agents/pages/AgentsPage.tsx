@@ -3,9 +3,9 @@ import { useState } from "react";
 import { Bot, Search, Plus, Trash2,Pencil } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import DashboardLayout from "@/components/layout/DashboardLayout";
-import CreateAgentDialog from "@/components/dashboard/CreateAgentDialog";
+import CreateAgentDialog from "@/features/agents/components/CreateAgentDialog";
 import { useAgents } from "@/context/AgentContext";
-import EditAgentDialog from "@/components/dashboard/EditAgentDialog";
+import EditAgentDialog from "@/features/agents/components/EditAgentDialog";
 import type { Agent } from "@/context/AgentContext";
 
 

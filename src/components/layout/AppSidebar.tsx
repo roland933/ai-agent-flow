@@ -7,14 +7,22 @@ import {
   ScrollText,
   Settings,
 } from "lucide-react";
+import { NavLink } from "react-router-dom";
 
 const navigation = [
-  { label: "Overview", icon: LayoutDashboard },
-  { label: "Agents", icon: Bot },
-  { label: "Tasks", icon: ClipboardList },
-  { label: "Executions", icon: Activity },
-  { label: "Logs", icon: ScrollText },
+  { label: "Overview", icon: LayoutDashboard, path: "/" },
+  { label: "Agents", icon: Bot, path: "/agents" },
+  { label: "Tasks", icon: ClipboardList, path: "/tasks" },
+  { label: "Executions", icon: Activity, path: "/executions" },
+  { label: "Logs", icon: ScrollText, path: "/logs" },
 ];
+
+const linkClasses = ({ isActive }: { isActive: boolean }) =>
+  `flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors ${
+    isActive
+      ? "bg-violet-600/15 text-violet-300"
+      : "text-slate-400 hover:bg-slate-800 hover:text-white"
+  }`;
 
 export default function AppSidebar() {
   return (
@@ -25,12 +33,8 @@ export default function AppSidebar() {
         </div>
 
         <div>
-          <h1 className="font-semibold text-white">
-            AgentFlow
-          </h1>
-          <p className="text-xs text-slate-500">
-            AI Control Center
-          </p>
+          <h1 className="font-semibold text-white">AgentFlow</h1>
+          <p className="text-xs text-slate-500">AI Control Center</p>
         </div>
       </div>
 
@@ -39,26 +43,27 @@ export default function AppSidebar() {
       </p>
 
       <nav className="space-y-1">
-        {navigation.map(({ label, icon: Icon }, index) => (
-          <button
+        {navigation.map(({ label, icon: Icon, path }) => (
+          <NavLink
             key={label}
-            className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors ${
-              index === 0
-                ? "bg-violet-600/15 text-violet-300"
-                : "text-slate-400 hover:bg-slate-800 hover:text-white"
-            }`}
+            to={path}
+            end={path === "/"}
+            className={linkClasses}
           >
             <Icon size={18} />
             {label}
-          </button>
+          </NavLink>
         ))}
       </nav>
 
       <div className="mt-auto border-t border-slate-800 pt-4">
-        <button className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-400 hover:bg-slate-800 hover:text-white">
+        <NavLink
+          to="/settings"
+          className={linkClasses}
+        >
           <Settings size={18} />
           Settings
-        </button>
+        </NavLink>
 
         <div className="mt-4 rounded-xl border border-slate-800 bg-slate-900/70 p-3">
           <p className="text-sm font-medium text-white">

@@ -3,12 +3,12 @@ import { useState } from "react";
 import { Plus, ArrowUpRight } from "lucide-react";
 
 import DashboardLayout from "@/components/layout/DashboardLayout";
-import StatCard from "@/components/dashboard/StatCard";
-import TaskStatistics from "@/components/dashboard/TaskStatistics";
-import RecentExecutions from "@/components/dashboard/RecentExecutions";
-import CreateAgentDialog from "@/components/dashboard/CreateAgentDialog";
+import StatCard from "../components/StatCard";
+import TaskStatistics from "../components/TaskStatistics";
+import RecentExecutions from "../components/RecentExecutions";
+import CreateAgentDialog from "@/features/agents/components/CreateAgentDialog";
 
-import { dashboardStats } from "../data/mock-data";
+import { dashboardStats } from "../../../data/mock-data";
 import { useAgents } from "@/context/AgentContext";
 import { useNavigate } from "react-router-dom";
 

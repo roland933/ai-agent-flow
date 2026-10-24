@@ -6,8 +6,8 @@ import {
   type ReactNode,
 } from "react";
 import { agents as initialAgents } from "../data/mock-data";
-import type { UpdateAgentInput } from "@/types/updateAgentInput";
-import type { CreateAgentInput } from "@/types/createAgentInput";
+import type { UpdateAgentInput } from "@/features/agents/types/updateAgentInput";
+import type { CreateAgentInput } from "@/features/agents/types/createAgentInput";
 
 export type Agent = (typeof initialAgents)[number] & {
   type?: string;
