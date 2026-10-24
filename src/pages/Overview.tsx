@@ -11,7 +11,6 @@ import CreateAgentDialog from "@/components/dashboard/CreateAgentDialog";
 import { dashboardStats } from "../data/mock-data";
 import { useAgents } from "@/context/AgentContext";
 import { useNavigate } from "react-router-dom";
-
 const statusStyles: Record<string, string> = {
   Running: "bg-emerald-500/10 text-emerald-400",
   Idle: "bg-sky-500/10 text-sky-400",
@@ -84,9 +83,8 @@ export default function Overview() {
               {agents.map((agent) => (
                 <tr
                   key={agent.id}
-                  onClick={() =>
-                    window.location.assign(`/agents/${agent.id}`)
-                  }
+                  onClick={() => navigate(`/agents/${agent.id}`)}
+                  
                   className="cursor-pointer border-b border-slate-800/70 last:border-0 hover:bg-slate-800/20"
                 >
                   <td className="px-5 py-4">

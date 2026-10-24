@@ -14,9 +14,12 @@ export default function AgentsPage() {
   const [createOpen, setCreateOpen] = useState(false);
 
   const filteredAgents = agents.filter((agent) => {
-    const matchesSearch =
-      agent.name.toLowerCase().includes(search.toLowerCase()) ||
-      agent.description.toLowerCase().includes(search.toLowerCase());
+  const searchTerm = search.toLowerCase().trim();
+
+  const matchesSearch =
+    agent.name.toLowerCase().includes(searchTerm) ||
+    agent.description.toLowerCase().includes(searchTerm) ||
+    agent.model.toLowerCase().includes(searchTerm);
 
     const matchesStatus = status === "All" || agent.status === status;
 

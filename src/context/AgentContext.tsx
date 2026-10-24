@@ -22,6 +22,7 @@ type CreateAgentInput = {
 type AgentContextValue = {
   agents: Agent[];
   createAgent: (input: CreateAgentInput) => void;
+  deleteAgent:(id:number) => void;
 };
 
 const AgentContext = createContext<AgentContextValue | null>(null);
@@ -44,8 +45,14 @@ export function AgentProvider({ children }: { children: ReactNode }) {
     setAgents((current) => [...current, newAgent]);
   }
 
+  function deleteAgent(id: number) {
+  setAgents((current) =>
+    current.filter((agent) => agent.id !== id),
+  );
+}
+
   return (
-    <AgentContext.Provider value={{ agents, createAgent }}>
+    <AgentContext.Provider value={{ agents, createAgent,deleteAgent }}>
       {children}
     </AgentContext.Provider>
   );
