@@ -8,7 +8,7 @@ import TaskStatistics from "../components/TaskStatistics";
 import RecentExecutions from "../components/RecentExecutions";
 import CreateAgentDialog from "@/features/agents/components/CreateAgentDialog";
 
-import { dashboardStats } from "../../../data/mock-data";
+import { dashboardStats } from "../../agents/data/mock-data";
 import { useAgents } from "@/context/AgentContext";
 import { useNavigate } from "react-router-dom";
 

@@ -8,7 +8,7 @@ import {
   CartesianGrid,
   Tooltip,
 } from "recharts";
-import { weeklyExecutions } from "../../../data/mock-data"
+import { weeklyExecutions } from "../../agents/data/mock-data"
 
 export default function TaskStatistics() {
   return (

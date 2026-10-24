@@ -5,7 +5,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { agents as initialAgents } from "../data/mock-data";
+import { agents as initialAgents } from "../features/agents/data/mock-data";
 import type { UpdateAgentInput } from "@/features/agents/types/updateAgentInput";
 import type { CreateAgentInput } from "@/features/agents/types/createAgentInput";
 
