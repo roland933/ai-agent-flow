@@ -1,0 +1,104 @@
+
+import { Clock3, CheckCircle2, CircleAlert, PlayCircle } from "lucide-react";
+
+import type { Task } from "../types/task";
+import { useAgents } from "@/context/AgentContext";
+
+type TaskListProps = {
+  tasks: Task[];
+  onSelectTask?: (task: Task) => void;
+};
+
+const statusStyles = {
+  Pending: "bg-amber-500/10 text-amber-400",
+  Running: "bg-violet-500/10 text-violet-400",
+  Completed: "bg-emerald-500/10 text-emerald-400",
+  Failed: "bg-rose-500/10 text-rose-400",
+};
+
+const statusIcons = {
+  Pending: Clock3,
+  Running: PlayCircle,
+  Completed: CheckCircle2,
+  Failed: CircleAlert,
+};
+
+export default function TaskList({
+  tasks,
+  onSelectTask,
+}: TaskListProps) {
+  const { agents } = useAgents();
+
+  if (tasks.length === 0) {
+    return (
+      <div className="rounded-xl border border-slate-800 bg-[#101827] p-10 text-center">
+        <p className="font-medium text-slate-200">No tasks found</p>
+        <p className="mt-2 text-sm text-slate-500">
+          Try changing your search or status filter.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="overflow-x-auto rounded-xl border border-slate-800 bg-[#101827]">
+      <table className="w-full text-left text-sm">
+        <thead className="text-xs text-slate-500">
+          <tr className="border-b border-slate-800">
+            <th className="px-5 py-3 font-medium">Task</th>
+            <th className="px-5 py-3 font-medium">Assigned Agent</th>
+            <th className="px-5 py-3 font-medium">Status</th>
+            <th className="px-5 py-3 font-medium">Created</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {tasks.map((task) => {
+            const agent = agents.find(
+              (item) => item.id === task.agentId,
+            );
+            const StatusIcon = statusIcons[task.status];
+
+            return (
+              <tr
+                key={task.id}
+                onClick={() => onSelectTask?.(task)}
+                className={`border-b border-slate-800/70 last:border-0 ${
+                  onSelectTask
+                    ? "cursor-pointer hover:bg-slate-800/30"
+                    : ""
+                }`}
+              >
+                <td className="px-5 py-4">
+                  <p className="font-medium text-slate-200">
+                    {task.title}
+                  </p>
+                  <p className="mt-1 max-w-md text-xs text-slate-500">
+                    {task.description}
+                  </p>
+                </td>
+
+                <td className="px-5 py-4 text-slate-400">
+                  {agent?.name ?? "Unassigned"}
+                </td>
+
+                <td className="px-5 py-4">
+                  <span
+                    className={`inline-flex items-center gap-2 rounded-full px-2.5 py-1 text-xs font-medium ${statusStyles[task.status]}`}
+                  >
+                    <StatusIcon size={14} />
+                    {task.status}
+                  </span>
+                </td>
+
+                <td className="whitespace-nowrap px-5 py-4 text-slate-500">
+                  {new Date(task.createdAt).toLocaleDateString()}
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+}
