@@ -4,12 +4,11 @@ import { ClipboardList, Search } from "lucide-react";
 
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import TaskList from "@/features/tasks/components/TaskList";
-import { mockTasks } from "@/features/tasks/data/mock-tasks";
 import type { TaskStatus } from "@/features/tasks/types/task";
 
-import type { TaskStatuses } from "../consts/taskConsts";
+import  { TaskStatuses } from "../consts/taskConsts";
 import { useTaskStore } from "../store/taskStore";
-
+import CreateTaskDialog from "@/features/tasks/components/CreateTaskDialog";
 
 
 
@@ -50,9 +49,12 @@ export default function TasksPage() {
           </div>
         </div>
 
-        <div className="rounded-lg border border-slate-800 bg-[#101827] px-4 py-2.5 text-sm text-slate-400">
-          {filteredTasks.length} of {mockTasks.length} tasks
-        </div>
+       <div className="flex items-center gap-3">
+        
+
+        <CreateTaskDialog />
+      </div>
+       
       </div>
 
       <div className="mb-6 flex flex-wrap gap-3">
@@ -72,11 +74,11 @@ export default function TasksPage() {
         <select
           value={status}
           onChange={(event) =>
-            setStatus(event.target.value as (typeof statuses)[number])
+            setStatus(event.target.value as (typeof TaskStatuses)[number])
           }
           className="rounded-lg border border-slate-800 bg-[#101827] px-4 py-2.5 text-sm"
         >
-          {statuses.map((item) => (
+          {TaskStatuses.map((item) => (
             <option key={item} value={item}>
               {item === "All" ? "All statuses" : item}
             </option>
@@ -85,6 +87,7 @@ export default function TasksPage() {
       </div>
 
       <TaskList tasks={filteredTasks} />
+      
     </DashboardLayout>
   );
 }
