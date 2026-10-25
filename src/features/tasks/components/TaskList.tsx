@@ -1,35 +1,19 @@
 
-import { Clock3, CheckCircle2, CircleAlert, PlayCircle } from "lucide-react";
 
 import type { Task } from "../types/task";
 import { useAgentStore } from "@/features/agents/store/agentStore";
-
+import { useTaskStore } from "@/features/tasks/store/taskStore";
+import { StatusIcons, StatusStyles } from "../consts/taskConsts";
 
 type TaskListProps = {
-  tasks: Task[];
   onSelectTask?: (task: Task) => void;
 };
 
-const statusStyles = {
-  Pending: "bg-amber-500/10 text-amber-400",
-  Running: "bg-violet-500/10 text-violet-400",
-  Completed: "bg-emerald-500/10 text-emerald-400",
-  Failed: "bg-rose-500/10 text-rose-400",
-};
-
-const statusIcons = {
-  Pending: Clock3,
-  Running: PlayCircle,
-  Completed: CheckCircle2,
-  Failed: CircleAlert,
-};
-
 export default function TaskList({
-  tasks,
   onSelectTask,
 }: TaskListProps) {
 const agents = useAgentStore((state) => state.agents);
-
+const tasks = useTaskStore((state) => state.tasks);
   if (tasks.length === 0) {
     return (
       <div className="rounded-xl border border-slate-800 bg-[#101827] p-10 text-center">
@@ -58,7 +42,7 @@ const agents = useAgentStore((state) => state.agents);
             const agent = agents.find(
               (item) => item.id === task.agentId,
             );
-            const StatusIcon = statusIcons[task.status];
+            const StatusIcon = StatusIcons[task.status];
 
             return (
               <tr
@@ -85,7 +69,7 @@ const agents = useAgentStore((state) => state.agents);
 
                 <td className="px-5 py-4">
                   <span
-                    className={`inline-flex items-center gap-2 rounded-full px-2.5 py-1 text-xs font-medium ${statusStyles[task.status]}`}
+                    className={`inline-flex items-center gap-2 rounded-full px-2.5 py-1 text-xs font-medium ${StatusStyles[task.status]}`}
                   >
                     <StatusIcon size={14} />
                     {task.status}

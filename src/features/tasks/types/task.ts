@@ -9,3 +9,16 @@ export type Task = {
   agentId: number | null;
   createdAt: string;
 };
+
+
+export type CreateTaskInput = {
+  title: string;
+  description: string;
+  agentId: number | null;
+};
+
+export type UpdateTaskInput = CreateTaskInput & {
+  status: TaskStatus;
+};
+
+

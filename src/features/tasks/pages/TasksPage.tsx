@@ -7,16 +7,21 @@ import TaskList from "@/features/tasks/components/TaskList";
 import { mockTasks } from "@/features/tasks/data/mock-tasks";
 import type { TaskStatus } from "@/features/tasks/types/task";
 
-const statuses = ["All", "Pending", "Running", "Completed", "Failed"] as const;
+import type { TaskStatuses } from "../consts/taskConsts";
+import { useTaskStore } from "../store/taskStore";
+
+
+
 
 export default function TasksPage() {
   const [search, setSearch] = useState("");
-  const [status, setStatus] = useState<(typeof statuses)[number]>("All");
+  const [status, setStatus] = useState<(typeof TaskStatuses)[number]>("All");
+  const tasks = useTaskStore((state) => state.tasks);
 
   const filteredTasks = useMemo(() => {
     const searchTerm = search.toLowerCase().trim();
 
-    return mockTasks.filter((task) => {
+    return tasks.filter((task) => {
       const matchesSearch =
         task.title.toLowerCase().includes(searchTerm) ||
         task.description.toLowerCase().includes(searchTerm);
@@ -26,7 +31,7 @@ export default function TasksPage() {
 
       return matchesSearch && matchesStatus;
     });
-  }, [search, status]);
+  }, [search, status,tasks]);
 
   return (
     <DashboardLayout>
