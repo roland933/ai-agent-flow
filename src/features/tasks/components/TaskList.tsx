@@ -3,15 +3,18 @@
 import type { Task } from "../types/task";
 import { useAgentStore } from "@/features/agents/store/agentStore";
 import { StatusIcons, StatusStyles } from "../consts/taskConsts";
+import { Button } from "@base-ui/react";
 
 type TaskListProps = {
   tasks:Task[]
   onSelectTask?: (task: Task) => void;
+  onDeleteTask: (task: Task) => void;
 };
 
 export default function TaskList({
   tasks,
   onSelectTask,
+  onDeleteTask
 }: TaskListProps) {
 const agents = useAgentStore((state) => state.agents);
 
@@ -79,6 +82,16 @@ const agents = useAgentStore((state) => state.agents);
 
                 <td className="whitespace-nowrap px-5 py-4 text-slate-500">
                   {new Date(task.createdAt).toLocaleDateString()}
+                </td>
+                <td>
+                  <Button
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      onDeleteTask(task);
+                    }}
+                  >
+                    Delete
+                  </Button>
                 </td>
               </tr>
             );

@@ -1,50 +1,33 @@
-import { useEffect, useMemo, useState } from "react";
 import { ClipboardList, Search } from "lucide-react";
-
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import TaskList from "@/features/tasks/components/TaskList";
-import type { Task, TaskStatus } from "@/features/tasks/types/task";
-
 import { TaskStatuses } from "../consts/taskConsts";
-import { useTaskStore } from "../store/taskStore";
+
 import CreateTaskDialog from "@/features/tasks/components/CreateTaskDialog";
 import { Button } from "@/components/ui/button";
 import EditTaskDialog from "../components/EditTaskDialog";
+import { DeleteTaskDialog } from "../components/DeleteTaskDialog";
+import { useTasks } from "../hooks/useTasks";
 
 export default function TasksPage() {
-  const [search, setSearch] = useState("");
-  const [status, setStatus] = useState<(typeof TaskStatuses)[number]>("All");
-  const tasks = useTaskStore((state) => state.tasks);
-  const [task,setTask] = useState<Task | null>(null)
-  const [createDialogOpen, setCreateDialogOpen] = useState(false);
-  const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const filteredTasks = useMemo(() => {
-    const searchTerm = search.toLowerCase().trim();
-
-    return tasks.filter((task) => {
-      const matchesSearch =
-        task.title.toLowerCase().includes(searchTerm) ||
-        task.description.toLowerCase().includes(searchTerm);
-
-      const matchesStatus =
-        status === "All" || task.status === (status as TaskStatus);
-
-      return matchesSearch && matchesStatus;
-    });
-  }, [search, status, tasks]);
-
-  const selectedTask = (task:Task) => {
-      setTask(task);
-      setEditDialogOpen(true)
-  }
-
-const handleEditDialogChange = (open: boolean) => {
-  setEditDialogOpen(open);
-
-  if (!open) {
-    setTask(null);
-  }
-};
+  
+  const {
+    task,
+    selectedTask,
+    deleteTask,
+    handleDeleteConfirm,
+    handleEditDialogChange,
+    editDialogOpen,
+    deleteDialogOpen,
+    setDeleteDialogOpen,
+    setCreateDialogOpen,
+    createDialogOpen,
+    filteredTasks,
+    search,
+    setSearch,
+    setStatus,
+    status,
+  } = useTasks();
 
   return (
     <DashboardLayout>
@@ -52,7 +35,17 @@ const handleEditDialogChange = (open: boolean) => {
         open={createDialogOpen}
         onOpenChange={setCreateDialogOpen}
       />
-      <EditTaskDialog  task={task} open={editDialogOpen} onOpenChange={handleEditDialogChange}/>
+      <EditTaskDialog
+        task={task}
+        open={editDialogOpen}
+        onOpenChange={handleEditDialogChange}
+      />
+
+      <DeleteTaskDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        onContinue={handleDeleteConfirm}
+      />
 
       <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
         <div>
@@ -103,7 +96,11 @@ const handleEditDialogChange = (open: boolean) => {
         </select>
       </div>
 
-      <TaskList tasks={filteredTasks} onSelectTask={selectedTask}/>
+      <TaskList
+        tasks={filteredTasks}
+        onSelectTask={selectedTask}
+        onDeleteTask={deleteTask}
+      />
     </DashboardLayout>
   );
 }

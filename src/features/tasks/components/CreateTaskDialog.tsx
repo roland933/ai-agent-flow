@@ -104,7 +104,7 @@ export default function CreateTaskDialog({open,onOpenChange}:CreateTaskDialogPro
           </div>
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
             <Button type="submit">Create Task</Button>
