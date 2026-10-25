@@ -1,6 +1,5 @@
 
 import { useState } from "react";
-import { Plus } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -10,18 +9,22 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useAgentStore } from "@/features/agents/store/agentStore";
 import { useTaskStore } from "@/features/tasks/store/taskStore";
 
-export default function CreateTaskDialog() {
+type CreateTaskDialogProps = {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+};
+
+export default function CreateTaskDialog({open,onOpenChange}:CreateTaskDialogProps) {
   const agents = useAgentStore((state) => state.agents);
   const createTask = useTaskStore((state) => state.createTask);
 
-  const [open, setOpen] = useState(false);
+
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [agentId, setAgentId] = useState("");
@@ -40,17 +43,12 @@ export default function CreateTaskDialog() {
     setTitle("");
     setDescription("");
     setAgentId("");
-    setOpen(false);
+    onOpenChange(false)
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button>
-          <Plus className="mr-2 h-4 w-4" />
-          Create Task
-        </Button>
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+    
 
       <DialogContent>
         <DialogHeader>

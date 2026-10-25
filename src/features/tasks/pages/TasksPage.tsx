@@ -1,22 +1,23 @@
-
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ClipboardList, Search } from "lucide-react";
 
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import TaskList from "@/features/tasks/components/TaskList";
-import type { TaskStatus } from "@/features/tasks/types/task";
+import type { Task, TaskStatus } from "@/features/tasks/types/task";
 
-import  { TaskStatuses } from "../consts/taskConsts";
+import { TaskStatuses } from "../consts/taskConsts";
 import { useTaskStore } from "../store/taskStore";
 import CreateTaskDialog from "@/features/tasks/components/CreateTaskDialog";
-
-
+import { Button } from "@/components/ui/button";
+import EditTaskDialog from "../components/EditTaskDialog";
 
 export default function TasksPage() {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState<(typeof TaskStatuses)[number]>("All");
   const tasks = useTaskStore((state) => state.tasks);
-
+  const [task,setTask] = useState<Task | null>(null)
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
   const filteredTasks = useMemo(() => {
     const searchTerm = search.toLowerCase().trim();
 
@@ -30,10 +31,29 @@ export default function TasksPage() {
 
       return matchesSearch && matchesStatus;
     });
-  }, [search, status,tasks]);
+  }, [search, status, tasks]);
+
+  const selectedTask = (task:Task) => {
+      setTask(task);
+      setEditDialogOpen(true)
+  }
+
+const handleEditDialogChange = (open: boolean) => {
+  setEditDialogOpen(open);
+
+  if (!open) {
+    setTask(null);
+  }
+};
 
   return (
     <DashboardLayout>
+      <CreateTaskDialog
+        open={createDialogOpen}
+        onOpenChange={setCreateDialogOpen}
+      />
+      <EditTaskDialog  task={task} open={editDialogOpen} onOpenChange={handleEditDialogChange}/>
+
       <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-3">
@@ -49,12 +69,9 @@ export default function TasksPage() {
           </div>
         </div>
 
-       <div className="flex items-center gap-3">
-        
-
-        <CreateTaskDialog />
-      </div>
-       
+        <div className="flex items-center gap-3">
+          <Button onClick={() => setCreateDialogOpen(true)}>Create Task</Button>
+        </div>
       </div>
 
       <div className="mb-6 flex flex-wrap gap-3">
@@ -86,8 +103,7 @@ export default function TasksPage() {
         </select>
       </div>
 
-      <TaskList tasks={filteredTasks} />
-      
+      <TaskList tasks={filteredTasks} onSelectTask={selectedTask}/>
     </DashboardLayout>
   );
 }

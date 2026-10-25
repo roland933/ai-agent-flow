@@ -2,18 +2,19 @@
 
 import type { Task } from "../types/task";
 import { useAgentStore } from "@/features/agents/store/agentStore";
-import { useTaskStore } from "@/features/tasks/store/taskStore";
 import { StatusIcons, StatusStyles } from "../consts/taskConsts";
 
 type TaskListProps = {
+  tasks:Task[]
   onSelectTask?: (task: Task) => void;
 };
 
 export default function TaskList({
+  tasks,
   onSelectTask,
 }: TaskListProps) {
 const agents = useAgentStore((state) => state.agents);
-const tasks = useTaskStore((state) => state.tasks);
+
   if (tasks.length === 0) {
     return (
       <div className="rounded-xl border border-slate-800 bg-[#101827] p-10 text-center">
