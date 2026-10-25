@@ -17,8 +17,8 @@ const icons = {
 type StatCardProps = {
   title: string;
   value: string;
-  change: string;
-  icon: keyof typeof icons;
+  change?: string;
+  icon?: keyof typeof icons;
 };
 
 export default function StatCard({

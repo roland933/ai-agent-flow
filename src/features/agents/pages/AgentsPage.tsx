@@ -4,13 +4,16 @@ import { Bot, Search, Plus, Trash2,Pencil } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import CreateAgentDialog from "@/features/agents/components/CreateAgentDialog";
-import { useAgents } from "@/context/AgentContext";
 import EditAgentDialog from "@/features/agents/components/EditAgentDialog";
 import type { Agent } from "@/context/AgentContext";
-
+import { useAgentStore } from "@/features/agents/store/agentStore";
 
 export default function AgentsPage() {
-  const { agents, deleteAgent } = useAgents();
+  
+const agents = useAgentStore((state) => state.agents);
+const deleteAgent = useAgentStore((state) => state.deleteAgent);
+
+
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("All");

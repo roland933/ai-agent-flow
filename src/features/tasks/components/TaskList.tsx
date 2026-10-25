@@ -2,7 +2,8 @@
 import { Clock3, CheckCircle2, CircleAlert, PlayCircle } from "lucide-react";
 
 import type { Task } from "../types/task";
-import { useAgents } from "@/context/AgentContext";
+import { useAgentStore } from "@/features/agents/store/agentStore";
+
 
 type TaskListProps = {
   tasks: Task[];
@@ -27,7 +28,7 @@ export default function TaskList({
   tasks,
   onSelectTask,
 }: TaskListProps) {
-  const { agents } = useAgents();
+const agents = useAgentStore((state) => state.agents);
 
   if (tasks.length === 0) {
     return (

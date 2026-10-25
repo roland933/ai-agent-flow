@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { Bot, X } from "lucide-react";
-import { useAgents } from "@/context/AgentContext";
+import { useAgentStore } from "../store/agentStore";
 
 type CreateAgentDialogProps = {
   open: boolean;
@@ -17,7 +17,9 @@ export default function CreateAgentDialog({
   const [description, setDescription] = useState("");
   const [type, setType] = useState("Research");
   const [model, setModel] = useState("GPT-4.1");
-  const { createAgent } = useAgents();
+ 
+  const createAgent = useAgentStore((state) => state.createAgent);
+
   if (!open) return null;
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {

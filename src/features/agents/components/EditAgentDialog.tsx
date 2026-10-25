@@ -2,8 +2,9 @@
 import { useEffect, useState } from "react";
 import { Pencil, X } from "lucide-react";
 
-import { useAgents } from "@/context/AgentContext";
-import type { Agent } from "@/context/AgentContext";
+
+import { useAgentStore } from "../store/agentStore";
+import type { Agent } from "../types/agent";
 
 type EditAgentDialogProps = {
   agent: Agent | null;
@@ -14,8 +15,8 @@ export default function EditAgentDialog({
   agent,
   onClose,
 }: EditAgentDialogProps) {
-  const { updateAgent } = useAgents();
 
+ const updateAgent = useAgentStore((state) => state.updateAgent);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [type, setType] = useState("Research");

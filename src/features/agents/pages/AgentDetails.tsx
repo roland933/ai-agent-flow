@@ -11,7 +11,7 @@ import {
 import { Navigate, useNavigate, useParams } from "react-router-dom";
 
 import DashboardLayout from "@/components/layout/DashboardLayout";
-import { useAgents } from "@/context/AgentContext";
+import { useAgentStore } from "../store/agentStore";
 
 const steps = [
   { label: "Gather information", status: "completed" },
@@ -29,7 +29,9 @@ const statusStyles: Record<string, string> = {
 export default function AgentDetails() {
   const { agentId } = useParams<{ agentId: string }>();
   const navigate = useNavigate();
-  const { agents, updateAgentStatus } = useAgents();
+
+   const updateAgentStatus = useAgentStore((state) => state.updateAgentStatus);
+   const agents = useAgentStore((state) => state.agents);
 
   const agent = agents.find((item) => item.id === Number(agentId));
 

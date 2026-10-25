@@ -9,7 +9,7 @@ import RecentExecutions from "../components/RecentExecutions";
 import CreateAgentDialog from "@/features/agents/components/CreateAgentDialog";
 
 import { dashboardStats } from "../../agents/data/mock-data";
-import { useAgents } from "@/context/AgentContext";
+import { useAgentStore } from "@/features/agents/store/agentStore";
 import { useNavigate } from "react-router-dom";
 
 
@@ -20,7 +20,7 @@ const statusStyles: Record<string, string> = {
 };
 
 export default function Overview() {
-  const { agents } = useAgents();
+  const agents = useAgentStore((state) => state.agents);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const navigate = useNavigate();
 
