@@ -11,6 +11,8 @@ import CreateAgentDialog from "@/features/agents/components/CreateAgentDialog";
 import { dashboardStats } from "../../agents/data/mock-data";
 import { useAgentStore } from "@/features/agents/store/agentStore";
 import { useNavigate } from "react-router-dom";
+import { HeaderLayout } from "@/components/layout/HeaderLayout";
+import { Stats } from "../components/Stats";
 
 
 const statusStyles: Record<string, string> = {
@@ -26,69 +28,26 @@ export default function Overview() {
 
   const totalAgents = agents.length;
 
-const runningAgents = agents.filter(
-  (agent) => agent.status === "Running",
-).length;
+  const runningAgents = agents.filter(
+    (agent) => agent.status === "Running",
+  ).length;
 
-const totalCompletedTasks = agents.reduce(
-  (total, agent) => total + agent.tasksCompleted,
-  0,
-);
+  const totalCompletedTasks = agents.reduce(
+    (total, agent) => total + agent.tasksCompleted,
+    0,
+  );
 
-const dynamicStats = dashboardStats.map((stat) => {
-  switch (stat.title) {
-    case "Total Agents":
-      return {
-        ...stat,
-        value: String(totalAgents),
-        change: "Currently configured",
-      };
-
-    case "Active Agents":
-      return {
-        ...stat,
-        value: String(runningAgents),
-        change: "Currently running agents",
-      };
-
-    case "Total Executions":
-      return {
-        ...stat,
-        value: totalCompletedTasks.toLocaleString(),
-        change: "Completed tasks",
-      };
-
-    default:
-      return stat;
-  }
-});
 
   return (
     <DashboardLayout>
-      <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">
-            Overview
-          </h1>
-          <p className="mt-2 text-sm text-slate-400">
-            Monitor and manage your AI agents.
-          </p>
-        </div>
 
-        <button
-          onClick={() => setIsCreateOpen(true)}
-          className="hover:cursor-pointer flex items-center gap-2 rounded-lg bg-violet-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-violet-500"
-        >
-          <Plus size={17} />
-          Create Agent
-        </button>
-      </div>
+      <HeaderLayout title="Overview" subTitle=" Monitor and manage your AI agents." />
 
-      <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {dynamicStats.map((stat) => (
-          <StatCard key={stat.title} {...stat} />
-        ))}
-      </section>
+        <Stats dashboardStats={dashboardStats} 
+               totalAgents={totalAgents} 
+               runningAgents={runningAgents} 
+               totalCompletedTasks={totalCompletedTasks}
+        />
 
       <section className="mt-8 rounded-xl border border-slate-800/80 bg-[#101827]">
         <div className="flex items-center justify-between border-b border-slate-800 px-5 py-4">
@@ -125,7 +84,7 @@ const dynamicStats = dashboardStats.map((stat) => {
                 <tr
                   key={agent.id}
                   onClick={() => navigate(`/agents/${agent.id}`)}
-                  
+
                   className="cursor-pointer border-b border-slate-800/70 last:border-0 hover:bg-slate-800/20"
                 >
                   <td className="px-5 py-4">
@@ -143,10 +102,9 @@ const dynamicStats = dashboardStats.map((stat) => {
 
                   <td className="px-5 py-4">
                     <span
-                      className={`inline-flex items-center gap-2 rounded-full px-2.5 py-1 text-xs font-medium ${
-                        statusStyles[agent.status] ??
+                      className={`inline-flex items-center gap-2 rounded-full px-2.5 py-1 text-xs font-medium ${statusStyles[agent.status] ??
                         "bg-slate-500/10 text-slate-400"
-                      }`}
+                        }`}
                     >
                       <span className="h-1.5 w-1.5 rounded-full bg-current" />
                       {agent.status}

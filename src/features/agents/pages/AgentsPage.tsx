@@ -5,8 +5,11 @@ import { useNavigate } from "react-router-dom";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import CreateAgentDialog from "@/features/agents/components/CreateAgentDialog";
 import EditAgentDialog from "@/features/agents/components/EditAgentDialog";
-import type { Agent } from "@/context/AgentContext";
 import { useAgentStore } from "@/features/agents/store/agentStore";
+import DataTable from "@/features/ui/table/DataTable";
+import type { Agent } from "../types/agent";
+import { getAgentColumns } from "../columns/agentColumns";
+import { HeaderLayout } from "@/components/layout/HeaderLayout";
 
 export default function AgentsPage() {
   
@@ -19,6 +22,22 @@ const deleteAgent = useAgentStore((state) => state.deleteAgent);
   const [status, setStatus] = useState("All");
   const [createOpen, setCreateOpen] = useState(false);
   const [editingAgent, setEditingAgent] = useState<Agent | null>(null);
+
+  const columns = getAgentColumns({
+  onEdit: (agent) => setEditingAgent(agent),
+
+  onDelete: (agent) => {
+    const confirmed = window.confirm(
+      `Biztosan törlöd ezt az agentet: ${agent.name}?`,
+    );
+
+    if (confirmed) {
+      deleteAgent(agent.id);
+    }
+  },
+
+  onView: (agent) => navigate(`/agents/${agent.id}`),
+});
 
   const filteredAgents = agents.filter((agent) => {
     const searchTerm = search.toLowerCase().trim();
@@ -35,23 +54,17 @@ const deleteAgent = useAgentStore((state) => state.deleteAgent);
 
   return (
     <DashboardLayout>
-      <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold">Agents</h1>
-          <p className="mt-2 text-sm text-slate-400">
-            Manage and configure your AI agents.
-          </p>
-        </div>
+      <HeaderLayout title="Agents" subTitle="Manage and configure your AI agents.">
 
-        <button
+          <button
           onClick={() => setCreateOpen(true)}
           className=" flex items-center gap-2 rounded-lg bg-violet-600 px-4 py-2.5 text-sm hover:bg-violet-500"
         >
           <Plus size={17} />
           Create Agent
         </button>
-      </div>
-
+      </HeaderLayout>
+ 
       <div className="mb-6 flex flex-wrap gap-3">
         <div className="relative min-w-[220px] flex-1">
           <Search
@@ -78,82 +91,14 @@ const deleteAgent = useAgentStore((state) => state.deleteAgent);
         </select>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+      <DataTable
+        columns={columns}
+        data={filteredAgents}
+        onRowClick={(agent) => navigate(`/agents/${agent.id}`)}
+        getRowId={(agent) => agent.id}
+      />
 
-        {filteredAgents.map((agent) => (
-          <div
-            key={agent.id}
-            className="rounded-xl border border-slate-800 bg-[#101827] p-5 transition hover:border-violet-500/60"
-          >
-            <div className="mb-4 flex items-center justify-between">
-              <button
-                onClick={() => navigate(`/agents/${agent.id}`)}
-                className="rounded-xl bg-violet-500/10 p-3 text-violet-400"
-                aria-label={`${agent.name} részletei`}
-              >
-                <Bot size={22} />
-              </button>
-
-              <div className="flex items-center gap-2">
-                <span className="rounded-full bg-slate-800 px-3 py-1 text-xs text-slate-300">
-                  {agent.status}
-                </span>
-
-                <button
-                  onClick={() => {
-                    const confirmed = window.confirm(
-                      `Biztosan törlöd ezt az agentet: ${agent.name}?`,
-                    );
-
-                    if (confirmed) {
-                      deleteAgent(agent.id);
-                    }
-                  }}
-                  className="rounded-lg p-2 text-slate-500 transition hover:bg-rose-500/10 hover:text-rose-400"
-                  aria-label={`${agent.name} törlése`}
-                  title="Delete agent"
-                >
-                  <Trash2 size={16} />
-                </button>
-
-                  <button
-                onClick={() => setEditingAgent(agent)}
-                className="rounded-lg p-2 text-slate-500 transition hover:bg-violet-500/10 hover:text-violet-400"
-                aria-label={`${agent.name} szerkesztése`}
-                title="Edit agent"
-              >
-                <Pencil size={16} />
-              </button>
-
-              </div>
-            </div>
-
-            <button
-              onClick={() => navigate(`/agents/${agent.id}`)}
-              className="block w-full text-left"
-            >
-              <h2 className="font-semibold">{agent.name}</h2>
-
-              <p className="mt-2 min-h-10 text-sm text-slate-400">
-                {agent.description}
-              </p>
-
-              <div className="mt-5 flex justify-between border-t border-slate-800 pt-4 text-xs text-slate-500">
-                <span>{agent.model}</span>
-                <span>{agent.tasksCompleted} tasks</span>
-              </div>
-            </button>
-          </div>
-        ))}
-
-      </div>
-
-      {filteredAgents.length === 0 && (
-        <p className="rounded-xl border border-slate-800 p-8 text-center text-sm text-slate-400">
-          No agents found.
-        </p>
-      )}
-
+     
       <CreateAgentDialog
         open={createOpen}
         onClose={() => setCreateOpen(false)}

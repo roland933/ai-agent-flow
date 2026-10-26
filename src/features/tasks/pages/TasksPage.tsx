@@ -1,16 +1,18 @@
+
 import { ClipboardList, Search } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
-import TaskList from "@/features/tasks/components/TaskList";
-import { TaskStatuses } from "../consts/taskConsts";
-
-import CreateTaskDialog from "@/features/tasks/components/CreateTaskDialog";
 import { Button } from "@/components/ui/button";
+import DataTable from "@/features/ui/table/DataTable";
+import { getTaskColumns } from "@/features/tasks/columns/taskColumns";
+import CreateTaskDialog from "@/features/tasks/components/CreateTaskDialog";
 import EditTaskDialog from "../components/EditTaskDialog";
 import { DeleteTaskDialog } from "../components/DeleteTaskDialog";
+import { TaskStatuses } from "../consts/taskConsts";
 import { useTasks } from "../hooks/useTasks";
+import { HeaderLayout } from "@/components/layout/HeaderLayout";
 
 export default function TasksPage() {
-  
+
   const {
     task,
     selectedTask,
@@ -29,12 +31,17 @@ export default function TasksPage() {
     status,
   } = useTasks();
 
+  const columns = getTaskColumns({
+    onDeleteTask: deleteTask,
+  });
+
   return (
     <DashboardLayout>
       <CreateTaskDialog
         open={createDialogOpen}
         onOpenChange={setCreateDialogOpen}
       />
+
       <EditTaskDialog
         task={task}
         open={editDialogOpen}
@@ -46,26 +53,18 @@ export default function TasksPage() {
         onOpenChange={setDeleteDialogOpen}
         onContinue={handleDeleteConfirm}
       />
-
-      <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-3">
-            <div className="rounded-xl bg-violet-500/10 p-3 text-violet-400">
-              <ClipboardList size={24} />
-            </div>
-            <div>
-              <h1 className="text-2xl font-semibold">Tasks</h1>
-              <p className="mt-1 text-sm text-slate-400">
-                Track and manage your AI agent tasks.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <Button onClick={() => setCreateDialogOpen(true)}>Create Task</Button>
-        </div>
-      </div>
+      
+      <HeaderLayout title="Tasks" 
+                    subTitle="Track and manage your AI agent tasks." 
+                    icon={<ClipboardList size={24} />
+                    
+                    }>
+        
+       <Button onClick={() => setCreateDialogOpen(true)}>
+          Create Task
+        </Button>
+      </HeaderLayout>
+     
 
       <div className="mb-6 flex flex-wrap gap-3">
         <div className="relative min-w-[220px] flex-1">
@@ -73,6 +72,7 @@ export default function TasksPage() {
             size={17}
             className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"
           />
+
           <input
             value={search}
             onChange={(event) => setSearch(event.target.value)}
@@ -96,10 +96,11 @@ export default function TasksPage() {
         </select>
       </div>
 
-      <TaskList
-        tasks={filteredTasks}
-        onSelectTask={selectedTask}
-        onDeleteTask={deleteTask}
+      <DataTable
+        columns={columns}
+        data={filteredTasks}
+        getRowId={(task) => task.id}
+        onRowClick={(task) => selectedTask(task)}
       />
     </DashboardLayout>
   );

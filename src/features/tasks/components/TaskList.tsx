@@ -6,7 +6,7 @@ import { StatusIcons, StatusStyles } from "../consts/taskConsts";
 import { Button } from "@base-ui/react";
 
 type TaskListProps = {
-  tasks:Task[]
+  tasks: Task[];
   onSelectTask?: (task: Task) => void;
   onDeleteTask: (task: Task) => void;
 };
@@ -14,9 +14,9 @@ type TaskListProps = {
 export default function TaskList({
   tasks,
   onSelectTask,
-  onDeleteTask
+  onDeleteTask,
 }: TaskListProps) {
-const agents = useAgentStore((state) => state.agents);
+  const agents = useAgentStore((state) => state.agents);
 
   if (tasks.length === 0) {
     return (
@@ -49,14 +49,14 @@ const agents = useAgentStore((state) => state.agents);
             const StatusIcon = StatusIcons[task.status];
 
             return (
+
               <tr
                 key={task.id}
                 onClick={() => onSelectTask?.(task)}
-                className={`border-b border-slate-800/70 last:border-0 ${
-                  onSelectTask
+                className={`border-b border-slate-800/70 last:border-0 ${onSelectTask
                     ? "cursor-pointer hover:bg-slate-800/30"
                     : ""
-                }`}
+                  }`}
               >
                 <td className="px-5 py-4">
                   <p className="font-medium text-slate-200">
@@ -83,7 +83,7 @@ const agents = useAgentStore((state) => state.agents);
                 <td className="whitespace-nowrap px-5 py-4 text-slate-500">
                   {new Date(task.createdAt).toLocaleDateString()}
                 </td>
-                <td>
+                <td className="flex gap-3">
                   <Button
                     onClick={(event) => {
                       event.stopPropagation();
