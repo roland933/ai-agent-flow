@@ -8,9 +8,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-import type {
-  DataTableProps,
-} from "@/features/ui/table/types/data-table";
+import type { DataTableProps } from "@/features/ui/table/types/data-table";
 
 export default function DataTable<T>({
   columns,
@@ -24,14 +22,29 @@ export default function DataTable<T>({
   onRowClick,
 }: DataTableProps<T>) {
   return (
-   <div className={`overflow-x-auto rounded-lg border ${className ?? ""}`}>
+    <div
+      className={[
+        "overflow-x-auto rounded-2xl border border-white/[0.10]",
+        "bg-white/[0.035] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]",
+        "backdrop-blur-xl",
+        className ?? "",
+      ].join(" ")}
+    >
       <Table className={tableClassName}>
         <TableHeader>
-         <TableRow className={headerClassName}>
+          <TableRow
+            className={[
+              "border-b border-white/[0.08] hover:bg-transparent",
+              headerClassName ?? "",
+            ].join(" ")}
+          >
             {columns.map((column) => (
               <TableHead
-                key={column.key}
-                className={column.className}
+                key={String(column.key)}
+                className={[
+                  "h-11 px-5 text-sm font-medium text-slate-200",
+                  column.className ?? "",
+                ].join(" ")}
               >
                 {column.header}
               </TableHead>
@@ -45,30 +58,37 @@ export default function DataTable<T>({
               key={getRowId(row)}
               onClick={() => onRowClick?.(row)}
               className={[
-                    onRowClick ? "cursor-pointer" : "",
-                    rowClassName ?? "",
-                ].join(" ")}
+                "border-b border-white/[0.06] transition-colors",
+                "hover:bg-white/[0.035]",
+                "last:border-b-0",
+                onRowClick ? "cursor-pointer" : "",
+                rowClassName ?? "",
+              ].join(" ")}
             >
               {columns.map((column) => (
-               <TableCell
-                    key={String(column.key)}
-                    className={[cellClassName, column.className]
-                        .filter(Boolean)
-                        .join(" ")}
-                    >
-               {column.cell
-                            ? column.cell(row)
-                            : String(row[column.key] ?? "—")}
+                <TableCell
+                  key={String(column.key)}
+                  className={[
+                    "px-5 py-3.5 text-sm text-slate-300",
+                    cellClassName ?? "",
+                    column.className ?? "",
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
+                >
+                  {column.cell
+                    ? column.cell(row)
+                    : String(row[column.key] ?? "—")}
                 </TableCell>
               ))}
             </TableRow>
           ))}
 
           {data.length === 0 && (
-            <TableRow>
+            <TableRow className="hover:bg-transparent">
               <TableCell
                 colSpan={columns.length}
-                className="h-24 text-center text-muted-foreground"
+                className="h-24 text-center text-sm text-slate-500"
               >
                 No results found.
               </TableCell>

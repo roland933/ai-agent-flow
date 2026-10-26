@@ -2,6 +2,7 @@ import { Bot, Pencil, Trash2,Eye } from "lucide-react";
 import type { Agent } from "@/features/agents/types/agent";
 import type { DataTableColumn } from "@/features/ui/table/types/data-table";
 import { Button } from "@/components/ui/button";
+import StatusBadge from "@/features/ui/status/StatusBadge";
 
 type AgentColumnActions = {
   onEdit: (agent: Agent) => void;
@@ -20,10 +21,10 @@ export function getAgentColumns({
       header: "Agent",
       cell: (agent) => (
         <button
-          className="flex items-center gap-3 text-left font-medium hover:text-primary hover:cursor-pointer"
+          className="flex items-center gap-3 text-left font-medium hover:text-emerald-400 hover:cursor-pointer"
           onClick={() => onView(agent)}
         >
-          <span className="rounded-lg bg-violet-500/10 p-2 text-violet-400">
+          <span className="rounded-lg bg-emerald-500/10 p-2 text-emerald-300">
             <Bot size={18} />
           </span>
           {agent.name}
@@ -39,18 +40,10 @@ export function getAgentColumns({
       key: "status",
       header: "Status",
       cell: (agent) => {
-        const statusStyles: Record<Agent["status"], string> = {
-          Running: "bg-blue-100 text-blue-800",
-          Idle: "bg-slate-100 text-slate-700",
-          Error: "bg-red-100 text-red-800",
-        };
-
+    
         return (
-          <span
-            className={`rounded-full px-2.5 py-1 text-xs font-medium ${statusStyles[agent.status]}`}
-          >
-            {agent.status}
-          </span>
+           <StatusBadge status={agent.status} />
+        
         );
       },
     },

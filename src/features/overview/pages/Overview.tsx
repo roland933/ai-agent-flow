@@ -44,8 +44,8 @@ export default function Overview() {
                totalCompletedTasks={totalCompletedTasks}
         />
 
-      <section className="mt-8 overflow-hidden rounded-2xl  border border-white/[0.10] bg-white/[0.035] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] backdrop-blur-xl">
-        <div className="flex items-center gap-1 text-sm text-emerald-300 transition-colors hover:text-emerald-200 px-5 py-4">
+      <section className="mt-8 overflow-hidden rounded-2xl  border border-white/5 px-5 py-5">
+        <div className="flex items-center gap-1 text-sm text-emerald-300 transition-colors hover:text-emerald-200 mb-5  px-5 py-0">
           <div>
             <h2 className="font-semibold">Your Agents</h2>
             <p className="mt-1 text-xs text-slate-500">
@@ -62,7 +62,8 @@ export default function Overview() {
         </div>
 
      
-      <div className="overflow-hidden rounded-b-2xl">
+   
+         <div className="overflow-hidden rounded-b-2xl">
         <DataTable
           columns={overviewAgentColumns}
           data={agents}
@@ -71,7 +72,7 @@ export default function Overview() {
         />
       </div>
 
-      </section>
+       </section>
 
       <div className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-2">
         <TaskStatistics />

@@ -1,0 +1,1 @@
+export type AgentModel =  "GPT-4.1" | "Claude"
