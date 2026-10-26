@@ -1,0 +1,48 @@
+import type { Execution } from "../types/execution";
+
+export const mockExecutions: Execution[] = [
+  {
+    id: 1,
+    taskId: 1,
+    agentId: 1,
+    status: "Running",
+    startedAt: "2026-10-25T08:30:00",
+    completedAt: null,
+    durationMs: null,
+    result: null,
+    error: null,
+  },
+  {
+    id: 2,
+    taskId: 3,
+    agentId: 3,
+    status: "Completed",
+    startedAt: "2026-10-24T14:00:00",
+    completedAt: "2026-10-24T14:00:08",
+    durationMs: 8000,
+    result: "Weekly report generated successfully.",
+    error: null,
+  },
+  {
+    id: 3,
+    taskId: 4,
+    agentId: 2,
+    status: "Failed",
+    startedAt: "2026-10-24T16:45:00",
+    completedAt: "2026-10-24T16:45:03",
+    durationMs: 3000,
+    result: null,
+    error: "The task failed while processing API logs.",
+  },
+  {
+    id: 4,
+    taskId: 2,
+    agentId: 2,
+    status: "Queued",
+    startedAt: null,
+    completedAt: null,
+    durationMs: null,
+    result: null,
+    error: null,
+  },
+];
