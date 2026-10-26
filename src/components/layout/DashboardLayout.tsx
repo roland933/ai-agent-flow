@@ -11,32 +11,57 @@ export default function DashboardLayout({
   children,
 }: DashboardLayoutProps) {
   return (
-    <div className="min-h-screen bg-[#080d19] text-slate-100">
-      <div className="flex">
+    <div className="relative min-h-screen overflow-hidden bg-[#080d12] text-slate-100">
+      {/* Ambient background lighting */}
+    
+{/* Ambient glass background */}
+<div className="pointer-events-none fixed inset-0 overflow-hidden">
+  <div
+    className="absolute inset-0"
+    style={{
+      background: `
+        radial-gradient(ellipse at 72% 12%, rgba(16, 185, 129, 0.20), transparent 35%),
+        radial-gradient(ellipse at 15% 45%, rgba(20, 184, 166, 0.14), transparent 32%),
+        radial-gradient(ellipse at 75% 85%, rgba(52, 211, 153, 0.10), transparent 35%),
+        linear-gradient(135deg, #080d12 0%, #0c151b 48%, #080d12 100%)
+      `,
+    }}
+  />
+
+  <div className="absolute -right-32 -top-40 h-[650px] w-[650px] rounded-full border border-emerald-200/[0.07] bg-emerald-400/[0.035] blur-[2px]" />
+
+  <div className="absolute -left-48 top-[35%] h-[600px] w-[600px] rounded-full bg-teal-400/[0.09] blur-[130px]" />
+
+  <div className="absolute bottom-[-350px] right-[15%] h-[650px] w-[650px] rounded-full bg-emerald-500/[0.10] blur-[150px]" />
+</div>
+
+
+      <div className="relative flex min-h-screen">
         <AppSidebar />
 
         <div className="min-w-0 flex-1">
-          <header className="flex h-[76px] items-center justify-between border-b border-slate-800/80 px-8">
+          <header className="sticky top-0 z-20 flex h-[76px] items-center justify-between border-b border-white/[0.025] bg-[#101820]/5 px-8 backdrop-blur-2xl">
             <div className="relative w-full max-w-md">
               <Search
                 size={18}
                 className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"
               />
+
               <input
                 placeholder="Search anything..."
-                className="w-full rounded-lg border border-slate-800 bg-slate-900/60 py-2.5 pl-10 pr-4 text-sm outline-none placeholder:text-slate-500 focus:border-violet-500"
+                className="w-full rounded-xl border border-white/[0.09] bg-white/[0.035] py-2.5 pl-10 pr-4 text-sm text-slate-100 outline-none transition-all placeholder:text-slate-500 hover:border-white/[0.14] focus:border-emerald-400/40 focus:bg-white/[0.055] focus:ring-2 focus:ring-emerald-400/10"
               />
             </div>
 
             <button
               aria-label="Notifications"
-              className="ml-5 rounded-lg border border-slate-800 p-2.5 text-slate-400 hover:bg-slate-800"
+              className="ml-5 rounded-xl border border-white/[0.09] bg-white/[0.035] p-2.5 text-slate-400 transition-all hover:border-emerald-400/20 hover:bg-emerald-400/[0.07] hover:text-emerald-300"
             >
               <Bell size={18} />
             </button>
           </header>
 
-          <main className="p-8">{children}</main>
+          <main className="relative p-8">{children}</main>
         </div>
       </div>
     </div>

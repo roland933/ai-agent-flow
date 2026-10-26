@@ -1,5 +1,6 @@
 
-import { CheckCircle2, Clock3, XCircle } from "lucide-react";
+import StatusBadge from "@/features/ui/status/StatusBadge";
+import { CheckCircle2, Clock3, XCircle, ArrowUpRight } from "lucide-react";
 
 const executions = [
   {
@@ -32,59 +33,51 @@ const executions = [
   },
 ];
 
-const statusConfig = {
-  Completed: {
-    icon: CheckCircle2,
-    classes: "bg-emerald-500/10 text-emerald-400",
-  },
-  Running: {
-    icon: Clock3,
-    classes: "bg-sky-500/10 text-sky-400",
-  },
-  Failed: {
-    icon: XCircle,
-    classes: "bg-rose-500/10 text-rose-400",
-  },
-};
 
 export default function RecentExecutions() {
   return (
-    <section className="rounded-xl border border-slate-800/80 bg-[#101827]">
-      <div className="flex items-center justify-between border-b border-slate-800 px-5 py-4">
-        <h2 className="font-semibold">Recent Executions</h2>
-        <button className="text-sm text-violet-400 hover:text-violet-300">
-          View all →
+    <section className="relative overflow-hidden rounded-2xl border border-white/[0.10] bg-white/[0.035] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] backdrop-blur-xl">
+      <div className="pointer-events-none absolute -right-16 -top-20 h-48 w-48 rounded-full bg-emerald-400/[0.06] blur-[80px]" />
+
+      <div className="relative flex items-center justify-between border-b border-white/[0.06] px-5 py-4">
+        <div>
+          <h2 className="font-semibold text-slate-100">
+            Recent Executions
+          </h2>
+          <p className="mt-1 text-xs text-slate-400">
+            Latest task activity
+          </p>
+        </div>
+
+        <button
+          type="button"
+          className="flex items-center gap-1 text-sm text-emerald-300 transition-colors hover:text-emerald-200"
+        >
+          View all <ArrowUpRight size={15} />
         </button>
       </div>
 
-      <div className="divide-y divide-slate-800/70">
+      <div className="relative divide-y divide-white/[0.06]">
         {executions.map((execution) => {
-          const config = statusConfig[
-            execution.status as keyof typeof statusConfig
-          ];
-          const Icon = config.icon;
+       
+          
 
           return (
             <div
               key={execution.id}
-              className="flex items-center justify-between gap-3 px-5 py-4"
+              className="flex items-center justify-between gap-3 px-5 py-4 transition-colors hover:bg-white/[0.025]"
             >
               <div className="min-w-0">
-                <p className="truncate text-sm font-medium text-slate-200">
+                <p className="truncate text-sm font-medium text-slate-100">
                   {execution.task}
                 </p>
-                <p className="mt-1 text-xs text-slate-500">
+                <p className="mt-1 text-xs text-slate-400">
                   {execution.agent}
                 </p>
               </div>
 
               <div className="flex shrink-0 flex-col items-end gap-2">
-                <span
-                  className={`flex items-center gap-1 rounded-full px-2 py-1 text-xs ${config.classes}`}
-                >
-                  <Icon size={12} />
-                  {execution.status}
-                </span>
+               <StatusBadge status={execution.status}/>
                 <span className="text-xs text-slate-500">
                   {execution.time}
                 </span>
