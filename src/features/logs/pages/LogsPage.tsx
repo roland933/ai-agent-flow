@@ -9,6 +9,7 @@ import { FilterBox } from "@/features/ui/filter-box/FilterBox";
 import { SearchInput } from "@/features/ui/input/SearchInput";
 import Select from "@/features/ui/select/Select";
 import { TableToolbar } from "@/features/ui/table/TableToolbar";
+import { ScrollText } from "lucide-react";
 
 const logLevels = ["All", "Info", "Success", "Warning", "Error"] as const;
 
@@ -40,6 +41,7 @@ export default function LogsPage() {
     <DashboardLayout>
       <HeaderLayout
         title="Logs"
+        icon={<ScrollText />}
         subTitle="Review application events, warnings and errors."
       />
 

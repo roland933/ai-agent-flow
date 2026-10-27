@@ -16,7 +16,9 @@ import { SearchInput } from "@/features/ui/input/SearchInput";
 import { FilterBox } from "@/features/ui/filter-box/FilterBox";
 import { Button } from "@/features/ui/button/Button";
 import { TableToolbar } from "@/features/ui/table/TableToolbar";
-
+import {
+  Bot,
+} from "lucide-react";
 
 export default function AgentsPage() {
   const agents = useAgentStore((state) => state.agents);
@@ -87,6 +89,7 @@ export default function AgentsPage() {
     <DashboardLayout>
       <HeaderLayout
         title="Agents"
+        icon={<Bot  />}
         subTitle="Manage and configure your AI agents."
       >
        <Button

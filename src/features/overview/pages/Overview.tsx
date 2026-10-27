@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import {  ArrowUpRight } from "lucide-react";
+import {  ArrowUpRight, LayoutDashboard } from "lucide-react";
 
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import TaskStatistics from "../components/TaskStatistics";
@@ -36,7 +36,10 @@ export default function Overview() {
   return (
     <DashboardLayout>
 
-      <HeaderLayout title="Overview" subTitle=" Monitor and manage your AI agents." />
+      <HeaderLayout 
+          title="Overview" 
+           icon={<LayoutDashboard />}
+          subTitle="Monitor and manage your AI agents." />
 
         <Stats dashboardStats={dashboardStats} 
                totalAgents={totalAgents} 
@@ -45,10 +48,10 @@ export default function Overview() {
         />
 
       <section className="mt-8 overflow-hidden rounded-2xl  border border-white/5 px-5 py-5">
-        <div className="flex items-center gap-1 text-sm text-emerald-300 transition-colors hover:text-emerald-200 mb-5  px-5 py-0">
+        <div className="flex items-center gap-1 text-md text-emerald-300 transition-colors hover:text-emerald-200 mb-5  px-5 py-0">
           <div>
             <h2 className="font-semibold">Your Agents</h2>
-            <p className="mt-1 text-xs text-slate-500">
+            <p className="mt-1 text-sm text-slate-300">
               Overview of your configured AI agents
             </p>
           </div>

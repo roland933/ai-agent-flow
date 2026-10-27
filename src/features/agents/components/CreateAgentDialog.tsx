@@ -1,144 +1,135 @@
 
-import { useState } from "react";
-import { Bot, X } from "lucide-react";
+import {  useState } from "react";
+import { Bot } from "lucide-react";
 import { useAgentStore } from "../store/agentStore";
+
+import { Dialog } from "@/features/ui/dialog/Dialog";
+import { FormInput } from "@/features/ui/form/FormInput";
+import { FormSelect } from "@/features/ui/form/FormSelect";
+import { FormTextarea } from "@/features/ui/form/FormTextarea";
+import { Button } from "@/features/ui/button/Button";
 
 type CreateAgentDialogProps = {
   open: boolean;
   onClose: () => void;
-
 };
+
+const typeOptions = [
+  { label: "Research", value: "Research" },
+  { label: "Code", value: "Code" },
+  { label: "Content", value: "Content" },
+  { label: "Data", value: "Data" },
+];
+
+const modelOptions = [
+  { label: "GPT-4.1", value: "GPT-4.1" },
+  { label: "Claude", value: "Claude" },
+  { label: "Local model", value: "Local model" },
+];
 
 export default function CreateAgentDialog({
   open,
   onClose,
 }: CreateAgentDialogProps) {
+  const createAgent = useAgentStore((state) => state.createAgent);
+
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [type, setType] = useState("Research");
   const [model, setModel] = useState("GPT-4.1");
- 
-  const createAgent = useAgentStore((state) => state.createAgent);
 
-  if (!open) return null;
+  function resetForm() {
+    setName("");
+    setDescription("");
+    setType("Research");
+    setModel("GPT-4.1");
+  }
+
+  function handleOpenChange(nextOpen: boolean) {
+    if (!nextOpen) onClose();
+  }
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     if (!name.trim()) return;
 
-    // Később itt hívjuk majd a backend API-t.
-    createAgent({ name, description, type, model });
-    setName("");
-    setDescription("");
-    setType("Research");
-    setModel("GPT-4.1");
+    createAgent({
+      name: name.trim(),
+      description: description.trim(),
+      type,
+      model,
+    });
+
+    resetForm();
     onClose();
   }
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
-      onMouseDown={(event) => {
-        if (event.target === event.currentTarget) onClose();
-      }}
+    <Dialog
+      open={open}
+      onOpenChange={handleOpenChange}
+      title="Create New Agent"
+      description="Configure your AI agent."
+      size="lg"
+      footer={
+        <>
+          <Button
+            title="Cancel"
+            variant="secondary"
+            onClick={onClose}
+          />
+
+          <Button
+            title="Create Agent"
+            icon={<Bot size={16} />}
+            type="submit"
+            form="create-agent-form"
+          />
+        </>
+      }
     >
       <form
+        id="create-agent-form"
         onSubmit={handleSubmit}
-        className="w-full max-w-lg rounded-2xl border border-slate-700 bg-[#101827] p-6 shadow-2xl"
+        className="space-y-5"
       >
-        <div className="mb-6 flex items-center justify-between">
-          <div>
-            <h2 className="text-xl font-semibold">Create New Agent</h2>
-            <p className="mt-1 text-sm text-slate-400">
-              Configure your AI agent.
-            </p>
-          </div>
-
-          <button
-            type="button"
-            aria-label="Close"
-            onClick={onClose}
-            className="rounded-lg p-2 text-slate-400 hover:bg-slate-800 hover:text-white"
-          >
-            <X size={18} />
-          </button>
-        </div>
-
-        <label className="mb-2 block text-sm text-slate-300">
-          Agent name
-        </label>
-        <input
-          required
+        <FormInput
+          id="agent-name"
+          label="Agent name"
           value={name}
-          onChange={(event) => setName(event.target.value)}
+          onChange={setName}
           placeholder="e.g. Research Agent"
-          className="mb-5 w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2.5 text-sm outline-none focus:border-violet-500"
+          required
         />
 
-        <label className="mb-2 block text-sm text-slate-300">
-          Description
-        </label>
-        <textarea
+        <FormTextarea
+          id="agent-description"
+          label="Description"
           value={description}
-          onChange={(event) => setDescription(event.target.value)}
+          onChange={setDescription}
           placeholder="What should this agent do?"
           rows={3}
-          className="mb-5 w-full resize-none rounded-lg border border-slate-700 bg-slate-900 px-3 py-2.5 text-sm outline-none focus:border-violet-500"
         />
 
-        <div className="mb-5 grid grid-cols-2 gap-4">
-          <div>
-            <label className="mb-2 block text-sm text-slate-300">
-              Agent type
-            </label>
-            <select
-              value={type}
-              onChange={(event) => setType(event.target.value)}
-              className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2.5 text-sm"
-            >
-              <option>Research</option>
-              <option>Code</option>
-              <option>Content</option>
-              <option>Data</option>
-            </select>
-          </div>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <FormSelect
+            id="agent-type"
+            label="Agent type"
+            value={type}
+            onChange={setType}
+            options={typeOptions}
+          />
 
-          <div>
-            <label className="mb-2 block text-sm text-slate-300">
-              Model
-            </label>
-            <select
-              value={model}
-              onChange={(event) => setModel(event.target.value)}
-              className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2.5 text-sm"
-            >
-              <option>GPT-4.1</option>
-              <option>Claude</option>
-              <option>Local model</option>
-            </select>
-          </div>
-        </div>
-
-        <div className="flex justify-end gap-3 border-t border-slate-800 pt-5">
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-lg border border-slate-700 px-4 py-2.5 text-sm hover:bg-slate-800"
-          >
-            Cancel
-          </button>
-
-          <button
-
-            type="submit"
-            className="flex items-center gap-2 rounded-lg bg-violet-600 px-4 py-2.5 text-sm font-medium hover:bg-violet-500"
-          >
-            <Bot size={16} />
-            Create Agent
-          </button>
+          <FormSelect
+            id="agent-model"
+            label="Model"
+            value={model}
+            onChange={setModel}
+            options={modelOptions}
+          />
         </div>
       </form>
-    </div>
+    </Dialog>
   );
 }

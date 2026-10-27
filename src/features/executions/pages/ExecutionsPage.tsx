@@ -1,5 +1,5 @@
 
-import { useMemo, useState } from "react";
+import {useMemo, useState } from "react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import DataTable from "@/features/ui/table/DataTable";
 import { TableToolbar } from "@/features/ui/table/TableToolbar";
@@ -13,10 +13,11 @@ import { useTaskStore } from "@/features/tasks/store/taskStore";
 import { useExecutionStore } from "@/features/executions/store/executionStore";
 import type {
   Execution,
-  ExecutionStatus,
+
 } from "@/features/executions/types/execution";
 import { getExecutionColumns } from "../columns/executionColumns";
 import ExecutionDetailsDialog from "../components/ExecutionDetailsDialog";
+import { Activity } from "lucide-react";
 
 const executionStatuses: { label: string; value: string }[] = [
   { label: "All statuses", value: "All" },
@@ -175,6 +176,7 @@ const handleStopExecution = (execution: Execution) => {
 
       <HeaderLayout
         title="Executions"
+         icon={<Activity />}
         subTitle="Monitor task execution history and status."
       />
 

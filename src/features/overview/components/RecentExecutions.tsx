@@ -1,6 +1,7 @@
 
 import StatusBadge from "@/features/ui/status/StatusBadge";
-import { CheckCircle2, Clock3, XCircle, ArrowUpRight } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const executions = [
   {
@@ -35,6 +36,7 @@ const executions = [
 
 
 export default function RecentExecutions() {
+    const navigate = useNavigate();
   return (
     <section className="relative overflow-hidden rounded-2xl border border-white/[0.10] bg-white/[0.035] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] backdrop-blur-xl">
       <div className="pointer-events-none absolute -right-16 -top-20 h-48 w-48 rounded-full bg-emerald-400/[0.06] blur-[80px]" />
@@ -50,8 +52,9 @@ export default function RecentExecutions() {
         </div>
 
         <button
+         onClick={() => navigate("/executions")}
           type="button"
-          className="flex items-center gap-1 text-sm text-emerald-300 transition-colors hover:text-emerald-200"
+          className="hover:cursor-pointer flex items-center gap-1 text-sm text-emerald-300 transition-colors hover:text-emerald-200"
         >
           View all <ArrowUpRight size={15} />
         </button>
@@ -71,14 +74,14 @@ export default function RecentExecutions() {
                 <p className="truncate text-sm font-medium text-slate-100">
                   {execution.task}
                 </p>
-                <p className="mt-1 text-xs text-slate-400">
+                <p className="mt-1 text-xs text-slate-300">
                   {execution.agent}
                 </p>
               </div>
 
               <div className="flex shrink-0 flex-col items-end gap-2">
                <StatusBadge status={execution.status}/>
-                <span className="text-xs text-slate-500">
+                <span className="text-xs text-slate-300">
                   {execution.time}
                 </span>
               </div>
