@@ -58,7 +58,7 @@ export function getAgentColumns({
     },
     {
       key: "id",
-      header: "Actions",
+      header: "",
       cell: (agent) => (
         <div className="flex items-center justify-end gap-1">
           <Button
