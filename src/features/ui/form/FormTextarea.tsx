@@ -30,6 +30,7 @@ export function FormTextarea({
       </Label>
 
       <Textarea
+     className="border-white/[0.10] bg-white/[0.025] text-slate-100 placeholder:text-slate-500 focus-visible:border-emerald-400/50 focus-visible:ring-2 focus-visible:ring-emerald-400/20"
         id={id}
         value={value}
         onChange={(event) => onChange(event.target.value)}

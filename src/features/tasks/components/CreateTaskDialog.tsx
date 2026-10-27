@@ -58,7 +58,7 @@ export default function CreateTaskDialog({ open, onOpenChange }: CreateTaskDialo
       onOpenChange={onOpenChange}
       title="Create a new task"
       description="Define a task and optionally assign it to an agent."
-      size="lg"
+    
       footer={
         <>
           <Button

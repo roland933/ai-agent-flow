@@ -1,11 +1,5 @@
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 
+import { Dialog } from "@/features/ui/dialog/Dialog";
 import type { Execution } from "../types/execution";
 
 type ExecutionDetailsDialogProps = {
@@ -26,55 +20,56 @@ export default function ExecutionDetailsDialog({
   if (!execution) return null;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>
-            Execution #{execution.id}
-          </DialogTitle>
-
-          <DialogDescription>
-            Detailed information about this execution.
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className="space-y-4">
-          <div>
-            <p className="text-sm text-muted-foreground">Task</p>
-            <p className="font-medium">{taskName}</p>
-          </div>
-
-          <div>
-            <p className="text-sm text-muted-foreground">Agent</p>
-            <p className="font-medium">{agentName}</p>
-          </div>
-
-          <div>
-            <p className="text-sm text-muted-foreground">Status</p>
-            <p className="font-medium">{execution.status}</p>
-          </div>
-
-          <div>
-            <p className="text-sm text-muted-foreground">Result</p>
-
-            <div className="mt-1 rounded-md bg-muted p-3 text-sm whitespace-pre-wrap">
-              {execution.result ?? "No result available."}
-            </div>
-          </div>
-
-          {execution.error && (
-            <div>
-              <p className="text-sm font-medium text-destructive">
-                Error
-              </p>
-
-              <div className="mt-1 rounded-md bg-destructive/10 p-3 text-sm text-destructive whitespace-pre-wrap">
-                {execution.error}
-              </div>
-            </div>
-          )}
+    <Dialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title={`Execution #${execution.id}`}
+      description="Detailed information about this execution."
+      size="xl"
+    >
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+        <div className="space-y-1">
+          <p className="text-sm text-slate-400">Task</p>
+          <p className="font-medium text-slate-100">{taskName}</p>
         </div>
-      </DialogContent>
+
+        <div className="space-y-1">
+          <p className="text-sm text-slate-400">Agent</p>
+          <p className="font-medium text-slate-100">{agentName}</p>
+        </div>
+
+        <div className="space-y-1">
+          <p className="text-sm text-slate-400">Status</p>
+          <p className="font-medium text-slate-100">{execution.status}</p>
+        </div>
+
+        <div className="space-y-1">
+          <p className="text-sm text-slate-400">Duration</p>
+          <p className="font-medium text-slate-100">
+            {execution.durationMs != null
+              ? `${execution.durationMs} ms`
+              : execution.status === "Running"
+                ? "In progress"
+                : "Not available"}
+          </p>
+        </div>
+
+        <div className="space-y-1 sm:col-span-2">
+         
+          <div className="whitespace-pre-wrap break-words rounded-xl border border-white/[0.08] bg-white/[0.025] p-4 text-sm leading-relaxed text-slate-200">
+            {execution.result ?? "No result available."}
+          </div>
+        </div>
+
+        {execution.error && (
+          <div className="space-y-1 sm:col-span-2">
+            <p className="text-sm font-medium text-rose-400">Error</p>
+            <div className="whitespace-pre-wrap break-words rounded-xl border border-rose-400/20 bg-rose-400/[0.06] p-4 text-sm leading-relaxed text-rose-300">
+              {execution.error}
+            </div>
+          </div>
+        )}
+      </div>
     </Dialog>
   );
 }

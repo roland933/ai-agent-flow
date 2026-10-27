@@ -65,7 +65,7 @@ export default function AppSidebar() {
         ))}
       </nav>
 
-      <div className="relative mt-auto border-t border-white/[0.08] pt-4">
+      <div className="relative mt-auto border-t border-white/[0.08] pt-4 hidden" >
         <NavLink to="/settings" className={linkClasses}>
           <Settings size={18} className="shrink-0" />
           <span>Settings</span>

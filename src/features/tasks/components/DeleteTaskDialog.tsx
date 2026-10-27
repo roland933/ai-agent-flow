@@ -19,7 +19,7 @@ export function DeleteTaskDialog({
       onOpenChange={onOpenChange}
       title="Delete this task?"
       description="This action cannot be undone. The selected task will be permanently deleted."
-      size="sm"
+      size="md"
       footer={
         <>
           <Button
@@ -37,8 +37,7 @@ export function DeleteTaskDialog({
       }
     >
       <p className="text-sm leading-relaxed text-slate-400">
-        Are you sure you want to delete this task? Any associated task data
-        may no longer be available.
+        Are you sure you want to delete this task? 
       </p>
     </Dialog>
   );

@@ -7,7 +7,7 @@ import { FilterBox } from "@/features/ui/filter-box/FilterBox";
 import { SearchInput } from "@/features/ui/input/SearchInput";
 import Select from "@/features/ui/select/Select";
 import { HeaderLayout } from "@/components/layout/HeaderLayout";
-
+import ExecutionAlertDialog from "../components/ExecutionAlertDialog";
 import { useAgentStore } from "@/features/agents/store/agentStore";
 import { useTaskStore } from "@/features/tasks/store/taskStore";
 import { useExecutionStore } from "@/features/executions/store/executionStore";
@@ -32,6 +32,10 @@ export default function ExecutionsPage() {
   const updateExecutionStatus = useExecutionStore(
     (state) => state.updateExecutionStatus,
   );
+  const [alertMessage, setAlertMessage] = useState<{
+  title: string;
+  description: string;
+} | null>(null);
 
   const tasks = useTaskStore((state) => state.tasks);
   const updateTaskStatus = useTaskStore((state) => state.updateTaskStatus);
@@ -110,25 +114,31 @@ export default function ExecutionsPage() {
     setDetailsOpen(true);
   };
 
-  const handleStartExecution = (execution: Execution) => {
-    if (execution.status !== "Queued") {
-      alert("This execution cannot be started because it is not queued.");
-      return;
-    }
+const handleStartExecution = (execution: Execution) => {
+  if (execution.status !== "Queued") {
+    setAlertMessage({
+      title: "Cannot start execution",
+      description: "This execution cannot be started because it is not queued.",
+    });
+    return;
+  }
 
-    updateExecutionStatus(execution.id, "Running");
-    updateTaskStatus(execution.taskId, "Running");
-  };
+  updateExecutionStatus(execution.id, "Running");
+  updateTaskStatus(execution.taskId, "Running");
+};
 
-  const handleStopExecution = (execution: Execution) => {
-    if (execution.status !== "Running") {
-      alert("This execution cannot be stopped because it is not running.");
-      return;
-    }
+const handleStopExecution = (execution: Execution) => {
+  if (execution.status !== "Running") {
+    setAlertMessage({
+      title: "Cannot stop execution",
+      description: "This execution cannot be stopped because it is not running.",
+    });
+    return;
+  }
 
-    updateExecutionStatus(execution.id, "Cancelled");
-    updateTaskStatus(execution.taskId, "Pending");
-  };
+  updateExecutionStatus(execution.id, "Cancelled");
+  updateTaskStatus(execution.taskId, "Pending");
+};
 
   const columns = getExecutionColumns({
     onStart: handleStartExecution,
@@ -137,6 +147,18 @@ export default function ExecutionsPage() {
 
   return (
     <DashboardLayout>
+
+        {alertMessage && (
+  <ExecutionAlertDialog
+    open={true}
+    onOpenChange={(open) => {
+      if (!open) setAlertMessage(null);
+    }}
+    title={alertMessage.title}
+    description={alertMessage.description}
+  />
+)}
+
       <ExecutionDetailsDialog
         execution={selectedExecution}
         open={detailsOpen}

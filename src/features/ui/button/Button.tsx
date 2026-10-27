@@ -39,7 +39,7 @@ export function Button({
       form={form}
       onClick={onClick}
       disabled={disabled}
-      className={`flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 ${variantStyles[variant]}`}
+      className={`hover:cursor-pointer flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 ${variantStyles[variant]}`}
     >
       {icon}
       {title}
