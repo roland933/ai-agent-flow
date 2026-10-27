@@ -3,6 +3,7 @@ import type { Agent } from "@/features/agents/types/agent";
 import type { DataTableColumn } from "@/features/ui/table/types/data-table";
 import { Button } from "@/components/ui/button";
 import StatusBadge from "@/features/ui/status/StatusBadge";
+import { TableActions } from "@/features/ui/table/TableActions";
 
 type AgentColumnActions = {
   onEdit: (agent: Agent) => void;
@@ -60,42 +61,34 @@ export function getAgentColumns({
       key: "id",
       header: "",
       cell: (agent) => (
-        <div className="flex items-center justify-end gap-1">
-          <Button
-            variant="ghost"
-            size="icon"
-            aria-label={`Edit ${agent.name}`}
-            onClick={(event) => {
-              event.stopPropagation();
-              onEdit(agent);
-            }}
-          >
-            <Pencil size={16} />
-          </Button>
+        <TableActions
+            actions={[
+              {
+                key: "edit",
+                label: `Edit ${agent.name}`,
+                icon: <Pencil size={16} />,
+                onClick: () => onEdit(agent),
+                visible: true,
+              },
+             
+              {
+                key: "view",
+                label: `View ${agent.name}`,
+                icon: <Eye size={16} />,
+                onClick: () => onView(agent),
+                visible: true,
+              },
 
-          <Button
-            variant="ghost"
-            size="icon"
-            aria-label={`Delete ${agent.name}`}
-            onClick={(event) => {
-              event.stopPropagation();
-              onDelete(agent);
-            }}
-          >
-            <Trash2 size={16} />
-          </Button>
-            <Button
-            variant="ghost"
-            size="icon"
-            aria-label={`Delete ${agent.name}`}
-            onClick={(event) => {
-              event.stopPropagation();
-              onView(agent);
-            }}
-          >
-            <Eye size={16} />
-          </Button> 
-        </div>
+               {
+                key: "delete",
+                label: `Delete ${agent.name}`,
+                icon: <Trash2 size={16} />,
+                onClick: () => onDelete(agent),
+                visible: true,
+                
+              },
+            ]}
+          />
       ),
     },
   ];
