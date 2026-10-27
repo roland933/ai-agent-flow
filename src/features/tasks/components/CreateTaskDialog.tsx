@@ -1,33 +1,39 @@
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/features/ui/button/Button";
+
 import { useAgentStore } from "@/features/agents/store/agentStore";
 import { useTaskStore } from "@/features/tasks/store/taskStore";
+import { Dialog } from "@/features/ui/dialog/Dialog";
+import { FormInput } from "@/features/ui/form/FormInput";
+import { FormSelect } from "@/features/ui/form/FormSelect";
+import { FormTextarea } from "@/features/ui/form/FormTextarea";
 
 type CreateTaskDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 };
 
-export default function CreateTaskDialog({open,onOpenChange}:CreateTaskDialogProps) {
+export default function CreateTaskDialog({ open, onOpenChange }: CreateTaskDialogProps) {
   const agents = useAgentStore((state) => state.agents);
   const createTask = useTaskStore((state) => state.createTask);
 
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [agentId, setAgentId] = useState("");
+  const [agentId, setAgentId] = useState("unassigned");
+
+  const agentOptions = useMemo(
+    () => [
+      { label: "Unassigned", value: "unassigned" },
+      ...agents.map((agent) => ({
+        label: agent.name,
+        value: String(agent.id),
+      })),
+    ],
+    [agents],
+  );
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -47,70 +53,66 @@ export default function CreateTaskDialog({open,onOpenChange}:CreateTaskDialogPro
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-    
+    <Dialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title="Create a new task"
+      description="Define a task and optionally assign it to an agent."
+      size="lg"
+      footer={
+        <>
+          <Button
+            title="Cancel"
+            variant="secondary"
+            onClick={() => onOpenChange(false)}
+          />
 
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Create a new task</DialogTitle>
-          <DialogDescription>
-            Define a task and optionally assign it to an agent.
-          </DialogDescription>
-        </DialogHeader>
+          <Button
+            title="Create Task"
+            type="submit"
+            form="create-task-form"
+          />
+        </>
+      }
+    >
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <label htmlFor="task-title" className="text-sm font-medium">
-              Title
-            </label>
-            <Input
-              id="task-title"
-              value={title}
-              onChange={(event) => setTitle(event.target.value)}
-              placeholder="e.g. Research a topic"
-              required
-            />
-          </div>
+      <form
+        id="create-task-form"
+        onSubmit={handleSubmit}
+        className="space-y-5"
+      >
+        <FormInput
+          id="task-title"
+          label="Title"
+          value={title}
+          onChange={setTitle}
+          placeholder="e.g. Research a topic"
+          required
+        />
 
-          <div className="space-y-2">
-            <label htmlFor="task-description" className="text-sm font-medium">
-              Description
-            </label>
-            <Textarea
-              id="task-description"
-              value={description}
-              onChange={(event) => setDescription(event.target.value)}
-              placeholder="Describe what the task should do..."
-            />
-          </div>
+        <FormSelect
+          id="task-agent"
+          label="Assign agent"
+          value={agentId}
+          onChange={setAgentId}
+          options={agentOptions}
+          placeholder="Select an agent"
+        />
 
-          <div className="space-y-2">
-            <label htmlFor="task-agent" className="text-sm font-medium">
-              Assign agent
-            </label>
-            <select
-              id="task-agent"
-              value={agentId}
-              onChange={(event) => setAgentId(event.target.value)}
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-            >
-              <option value="">Unassigned</option>
-              {agents.map((agent) => (
-                <option key={agent.id} value={agent.id}>
-                  {agent.name}
-                </option>
-              ))}
-            </select>
-          </div>
+        <FormTextarea
+          id="task-description"
+          label="Description"
+          value={description}
+          onChange={setDescription}
+          placeholder="Describe what the task should do..."
+          rows={4}
+        />
+      </form>
 
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
-            </Button>
-            <Button type="submit">Create Task</Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
+
     </Dialog>
   );
+
+
+
 }

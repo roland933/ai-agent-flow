@@ -6,10 +6,11 @@ import { Button } from "@/components/ui/button";
 type TableAction = {
   key: string;
   label: string;
-  icon: ReactNode;
+  icon?: ReactNode;
   onClick: () => void;
   visible?: boolean;
   variant?: "ghost" | "destructive";
+  className?:string
 };
 
 type TableActionsProps = {
@@ -23,7 +24,7 @@ export function TableActions({ actions }: TableActionsProps) {
         .filter((action) => action.visible !== false)
         .map((action) => (
           <Button
-            className="hover:cursor-pointer"
+            className={`hover:cursor-pointer ${action.className}`}
             key={action.key}
             type="button"
             variant={action.variant ?? "ghost"}

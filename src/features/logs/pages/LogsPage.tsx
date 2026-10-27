@@ -1,16 +1,20 @@
+
 import { useMemo, useState } from "react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
+import { HeaderLayout } from "@/components/layout/HeaderLayout";
 import { mockLogs } from "@/features/logs/data/mock-logs";
 import DataTable from "@/features/ui/table/DataTable";
 import { logColumns } from "@/features/logs/columns/logColumns";
-import { HeaderLayout } from "@/components/layout/HeaderLayout";
+import { FilterBox } from "@/features/ui/filter-box/FilterBox";
+import { SearchInput } from "@/features/ui/input/SearchInput";
+import Select from "@/features/ui/select/Select";
+import { TableToolbar } from "@/features/ui/table/TableToolbar";
 
 const logLevels = ["All", "Info", "Success", "Warning", "Error"] as const;
 
 export default function LogsPage() {
   const [level, setLevel] =
     useState<(typeof logLevels)[number]>("All");
-
   const [search, setSearch] = useState("");
 
   const filteredLogs = useMemo(() => {
@@ -27,48 +31,50 @@ export default function LogsPage() {
     });
   }, [level, search]);
 
+  const handleResetFilters = () => {
+    setSearch("");
+    setLevel("All");
+  };
+
   return (
     <DashboardLayout>
+      <HeaderLayout
+        title="Logs"
+        subTitle="Review application events, warnings and errors."
+      />
 
-      <HeaderLayout title="Logs" subTitle="Review application events, warnings and errors." />
-
-
-      <div className="flex flex-col gap-3 sm:flex-row mb-5">
-        <input
-          type="text"
+      <FilterBox onReset={handleResetFilters}>
+        <SearchInput
+          label="Search"
+          placeholder="Search logs"
           value={search}
-          onChange={(event) => setSearch(event.target.value)}
-          placeholder="Search logs..."
-          className="h-10 flex-1 rounded-md border bg-background px-3 text-sm"
+          onChange={setSearch}
         />
 
-        <select
+        <Select
+          label="Level"
           value={level}
-          onChange={(event) =>
-            setLevel(event.target.value as (typeof logLevels)[number])
+          onChange={(value) =>
+            setLevel(value as (typeof logLevels)[number])
           }
-          className="h-10 rounded-md border bg-background px-3 text-sm"
-        >
-          {logLevels.map((item) => (
-            <option key={item} value={item}>
-              {item === "All" ? "All levels" : item}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <div className="overflow-x-auto rounded-lg border">
-        <DataTable
-          columns={logColumns}
-          data={filteredLogs}
-          getRowId={(log) => log.id}
+          options={logLevels.map((item) => ({
+            label: item === "All" ? "All levels" : item,
+            value: item,
+          }))}
         />
-      </div>
+      </FilterBox>
 
-      <p className="text-sm text-muted-foreground">
-        Showing {filteredLogs.length} of {mockLogs.length} log entries
-      </p>
-   
-    </DashboardLayout >
+      <TableToolbar
+        filteredCount={filteredLogs.length}
+        totalCount={mockLogs.length}
+        itemName="log entries"
+      />
+
+      <DataTable
+        columns={logColumns}
+        data={filteredLogs}
+        getRowId={(log) => log.id}
+      />
+    </DashboardLayout>
   );
 }

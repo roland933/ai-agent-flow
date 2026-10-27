@@ -12,7 +12,7 @@ export function HeaderLayout({ title, subTitle, icon, children }: HeaderLayoutPr
         <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-3">
                 {icon && (
-                    <div className="rounded-xl bg-violet-500/10 p-3 text-violet-400">
+                    <div className="rounded-xl bg-emerald-500/10 p-3 text-emerald-300">
                         {icon}
                     </div>
 

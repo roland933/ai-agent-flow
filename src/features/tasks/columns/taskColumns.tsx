@@ -1,10 +1,10 @@
 
 import { Trash2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { useAgentStore } from "@/features/agents/store/agentStore";
 import type { DataTableColumn } from "@/features/ui/table/types/data-table";
-import { StatusIcons, StatusStyles } from "../consts/taskConsts";
 import type { Task } from "../types/task";
+import { TableActions } from "@/features/ui/table/TableActions";
+import StatusBadge from "@/features/ui/status/StatusBadge";
 
 type TaskColumnActions = {
   onDeleteTask: (task: Task) => void;
@@ -35,7 +35,7 @@ export function getTaskColumns({
         const agent = agents.find((item) => item.id === task.agentId);
 
         return (
-          <span className="text-slate-400">
+          <span className="text-slate-300">
             {agent?.name ?? "Unassigned"}
           </span>
         );
@@ -45,15 +45,9 @@ export function getTaskColumns({
       key: "status",
       header: "Status",
       cell: (task) => {
-        const StatusIcon = StatusIcons[task.status];
-
         return (
-          <span
-            className={`inline-flex items-center gap-2 rounded-full px-2.5 py-1 text-xs font-medium ${StatusStyles[task.status]}`}
-          >
-            <StatusIcon size={14} />
-            {task.status}
-          </span>
+           <StatusBadge status={task.status} />
+         
         );
       },
     },
@@ -61,29 +55,28 @@ export function getTaskColumns({
       key: "createdAt",
       header: "Created",
       cell: (task) => (
-        <span className="whitespace-nowrap text-slate-500">
+        <span className="whitespace-nowrap text-slate-300">
           {new Date(task.createdAt).toLocaleDateString()}
         </span>
       ),
     },
     {
       key: "id",
-      header: "Actions",
+      header: "",
       cell: (task) => (
-        <div className="flex justify-end">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-slate-400 hover:text-red-400"
-            onClick={(event) => {
-              event.stopPropagation();
-              onDeleteTask(task);
-            }}
-          >
-            <Trash2 size={16} />
-            Delete
-          </Button>
-        </div>
+        <TableActions
+          actions={[
+            {
+              key:  `Delete ${task.title}`,
+              label: `Delete `,
+              icon: <Trash2 size={16} />,
+              onClick: () => onDeleteTask(task),
+              visible: true,
+
+            },
+          ]}
+        />
+
       ),
     },
   ];

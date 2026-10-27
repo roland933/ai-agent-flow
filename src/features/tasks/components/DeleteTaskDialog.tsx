@@ -1,40 +1,45 @@
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
- 
-} from "@/components/ui/alert-dialog"
+
+import { Dialog } from "@/features/ui/dialog/Dialog";
+import { Button } from "@/features/ui/button/Button";
 
 type DeleteTaskDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onContinue:() => void
+  onContinue: () => void;
 };
 
-
-
-export function DeleteTaskDialog({open,onOpenChange,onContinue}:DeleteTaskDialogProps) {
+export function DeleteTaskDialog({
+  open,
+  onOpenChange,
+  onContinue,
+}: DeleteTaskDialogProps) {
   return (
-    <AlertDialog open={open} onOpenChange={onOpenChange}>
-    
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Delete this task?</AlertDialogTitle>
-          <AlertDialogDescription>
-           This action cannot be undone. The selected task will be permanently deleted.ill permanently delete your
-            account from our servers.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction onClick={onContinue}>Continue</AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
-  )
+    <Dialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title="Delete this task?"
+      description="This action cannot be undone. The selected task will be permanently deleted."
+      size="sm"
+      footer={
+        <>
+          <Button
+            title="Cancel"
+            variant="secondary"
+            onClick={() => onOpenChange(false)}
+          />
+
+          <Button
+            title="Delete task"
+            variant="danger"
+            onClick={onContinue}
+          />
+        </>
+      }
+    >
+      <p className="text-sm leading-relaxed text-slate-400">
+        Are you sure you want to delete this task? Any associated task data
+        may no longer be available.
+      </p>
+    </Dialog>
+  );
 }

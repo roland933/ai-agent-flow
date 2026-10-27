@@ -3,10 +3,10 @@ import type { Log } from "@/features/logs/types/log";
 import { formatDate } from "@/helpers/format";
 
 const levelStyles: Record<Log["level"], string> = {
-  Info: "bg-blue-100 text-blue-800",
-  Success: "bg-green-100 text-green-800",
-  Warning: "bg-yellow-100 text-yellow-800",
-  Error: "bg-red-100 text-red-800",
+  Info: "border-sky-400/15 bg-sky-400/10 text-sky-300",
+  Success: "border-emerald-400/15 bg-emerald-400/10 text-emerald-300",
+  Warning: "border-amber-400/15 bg-amber-400/10 text-amber-300",
+  Error: "border-rose-400/15 bg-rose-400/10 text-rose-300",
 };
 
 export const logColumns: DataTableColumn<Log>[] = [
@@ -20,6 +20,7 @@ export const logColumns: DataTableColumn<Log>[] = [
     key: "level",
     header: "Level",
     cell: (log) => (
+     
       <span
         className={`rounded-full px-2.5 py-1 text-xs font-medium ${levelStyles[log.level]}`}
       >

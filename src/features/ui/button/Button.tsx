@@ -5,11 +5,13 @@ import type { ReactNode } from "react";
 type ButtonVariant = "primary" | "secondary" | "danger";
 
 type ButtonProps = {
-  onClick: () => void;
+  onClick?: () => void;
   title: string;
   icon?: ReactNode;
   variant?: ButtonVariant;
   disabled?: boolean;
+  type?: "button" | "submit" | "reset";
+  form?: string;
 };
 
 const variantStyles: Record<ButtonVariant, string> = {
@@ -22,20 +24,22 @@ const variantStyles: Record<ButtonVariant, string> = {
   danger:
     "border-rose-400/20 bg-rose-400/10 text-rose-300 hover:border-rose-400/30 hover:bg-rose-400/[0.16] hover:text-rose-200",
 };
-
 export function Button({
   onClick,
   title,
   icon,
   variant = "primary",
   disabled = false,
+  type = "button",
+  form,
 }: ButtonProps) {
   return (
     <ShadcnButton
-      type="button"
+      type={type}
+      form={form}
       onClick={onClick}
       disabled={disabled}
-      className={`hover:cursor-pointer flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 ${variantStyles[variant]}`}
+      className={`flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 ${variantStyles[variant]}`}
     >
       {icon}
       {title}

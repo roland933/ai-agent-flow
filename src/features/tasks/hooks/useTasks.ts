@@ -18,6 +18,8 @@ export function useTasks() {
 
   const executions = useExecutionStore((state) => state.executions);
 
+    const totalTasks = useTaskStore((state) => state.tasks.length);
+
   const selectedTask = (task: Task) => {
     setTask(task);
     setEditDialogOpen(true);
@@ -105,7 +107,8 @@ export function useTasks() {
     setStatus,
     setSearch,
     status,
-    handleStartTask
+    handleStartTask,
+    totalTasks
 
   };
 }

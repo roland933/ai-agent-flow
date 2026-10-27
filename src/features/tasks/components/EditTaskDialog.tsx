@@ -1,26 +1,28 @@
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { useAgentStore } from "@/features/agents/store/agentStore";
-import type { Task, TaskStatus } from "@/features/tasks/types/task";
 import { useTaskStore } from "@/features/tasks/store/taskStore";
+import type { Task, TaskStatus } from "@/features/tasks/types/task";
+
+import { Dialog } from "@/features/ui/dialog/Dialog";
+import { FormInput } from "@/features/ui/form/FormInput";
+import { FormSelect } from "@/features/ui/form/FormSelect";
+import { FormTextarea } from "@/features/ui/form/FormTextarea";
+import { Button } from "@/features/ui/button/Button";
 
 type EditTaskDialogProps = {
   task: Task | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 };
+
+const statusOptions: { label: string; value: string }[] = [
+  { label: "Pending", value: "Pending" },
+  { label: "Running", value: "Running" },
+  { label: "Completed", value: "Completed" },
+  { label: "Failed", value: "Failed" },
+];
 
 export default function EditTaskDialog({
   task,
@@ -32,15 +34,28 @@ export default function EditTaskDialog({
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [agentId, setAgentId] = useState("");
+  const [agentId, setAgentId] = useState("unassigned");
   const [status, setStatus] = useState<TaskStatus>("Pending");
+
+  const agentOptions = useMemo(
+    () => [
+      { label: "Unassigned", value: "unassigned" },
+      ...agents.map((agent) => ({
+        label: agent.name,
+        value: String(agent.id),
+      })),
+    ],
+    [agents],
+  );
 
   useEffect(() => {
     if (!task) return;
 
     setTitle(task.title);
     setDescription(task.description);
-    setAgentId(task.agentId === null ? "" : String(task.agentId));
+    setAgentId(
+      task.agentId === null ? "unassigned" : String(task.agentId),
+    );
     setStatus(task.status);
   }, [task]);
 
@@ -52,7 +67,7 @@ export default function EditTaskDialog({
     updateTask(task.id, {
       title,
       description,
-      agentId: agentId ? Number(agentId) : null,
+      agentId: agentId === "unassigned" ? null : Number(agentId),
       status,
     });
 
@@ -60,92 +75,68 @@ export default function EditTaskDialog({
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Edit task</DialogTitle>
-          <DialogDescription>
-            Update the task details, assigned agent, or status.
-          </DialogDescription>
-        </DialogHeader>
+    <Dialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title="Edit task"
+      description="Update the task details, assigned agent, or status."
+      size="lg"
+      footer={
+        <>
+          <Button
+            title="Cancel"
+            variant="secondary"
+            onClick={() => onOpenChange(false)}
+          />
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <label htmlFor="edit-task-title" className="text-sm font-medium">
-              Title
-            </label>
-            <Input
-              id="edit-task-title"
-              value={title}
-              onChange={(event) => setTitle(event.target.value)}
-              required
-            />
-          </div>
+          <Button
+            title="Save changes"
+            type="submit"
+            form="edit-task-form"
+          />
+        </>
+      }
+    >
+      <form
+        id="edit-task-form"
+        onSubmit={handleSubmit}
+        className="space-y-5"
+      >
+        <FormInput
+          id="edit-task-title"
+          label="Title"
+          value={title}
+          onChange={setTitle}
+          placeholder="Task title"
+          required
+        />
 
-          <div className="space-y-2">
-            <label
-              htmlFor="edit-task-description"
-              className="text-sm font-medium"
-            >
-              Description
-            </label>
-            <Textarea
-              id="edit-task-description"
-              value={description}
-              onChange={(event) => setDescription(event.target.value)}
-            />
-          </div>
+        <FormTextarea
+          id="edit-task-description"
+          label="Description"
+          value={description}
+          onChange={setDescription}
+          placeholder="Describe what the task should do..."
+          rows={4}
+        />
 
-          <div className="space-y-2">
-            <label htmlFor="edit-task-agent" className="text-sm font-medium">
-              Assigned agent
-            </label>
-            <select
-              id="edit-task-agent"
-              value={agentId}
-              onChange={(event) => setAgentId(event.target.value)}
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-            >
-              <option value="">Unassigned</option>
-              {agents.map((agent) => (
-                <option key={agent.id} value={agent.id}>
-                  {agent.name}
-                </option>
-              ))}
-            </select>
-          </div>
+        <FormSelect
+          id="edit-task-agent"
+          label="Assigned agent"
+          value={agentId}
+          onChange={setAgentId}
+          options={agentOptions}
+          placeholder="Select an agent"
+        />
 
-          <div className="space-y-2">
-            <label htmlFor="edit-task-status" className="text-sm font-medium">
-              Status
-            </label>
-            <select
-              id="edit-task-status"
-              value={status}
-              onChange={(event) =>
-                setStatus(event.target.value as TaskStatus)
-              }
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-            >
-              <option value="Pending">Pending</option>
-              <option value="Running">Running</option>
-              <option value="Completed">Completed</option>
-              <option value="Failed">Failed</option>
-            </select>
-          </div>
-
-          <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-            >
-              Cancel
-            </Button>
-            <Button type="submit">Save changes</Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
+        <FormSelect
+          id="edit-task-status"
+          label="Status"
+          value={status}
+          onChange={(value) => setStatus(value as TaskStatus)}
+          options={statusOptions}
+        />
+      </form>
     </Dialog>
   );
 }

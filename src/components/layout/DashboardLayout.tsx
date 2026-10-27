@@ -41,21 +41,11 @@ export default function DashboardLayout({
 
         <div className="min-w-0 flex-1">
           <header className="sticky top-0 z-20 flex h-[76px] items-center justify-between border-b border-white/[0.025] bg-[#101820]/5 px-8 backdrop-blur-2xl">
-            <div className="relative w-full max-w-md">
-              <Search
-                size={18}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"
-              />
-
-              <input
-                placeholder="Search anything..."
-                className="w-full rounded-xl border border-white/[0.09] bg-white/[0.035] py-2.5 pl-10 pr-4 text-sm text-slate-100 outline-none transition-all placeholder:text-slate-500 hover:border-white/[0.14] focus:border-emerald-400/40 focus:bg-white/[0.055] focus:ring-2 focus:ring-emerald-400/10"
-              />
-            </div>
+            
 
             <button
               aria-label="Notifications"
-              className="ml-5 rounded-xl border border-white/[0.09] bg-white/[0.035] p-2.5 text-slate-400 transition-all hover:border-emerald-400/20 hover:bg-emerald-400/[0.07] hover:text-emerald-300"
+              className="ml-auto rounded-xl border border-white/[0.09] bg-white/[0.035] p-2.5 text-slate-400 transition-all hover:border-emerald-400/20 hover:bg-emerald-400/[0.07] hover:text-emerald-300"
             >
               <Bell size={18} />
             </button>

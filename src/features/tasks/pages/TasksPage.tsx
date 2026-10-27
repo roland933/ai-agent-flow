@@ -1,18 +1,23 @@
 
-import { ClipboardList, Search } from "lucide-react";
+import { ClipboardList, Plus } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
-import { Button } from "@/components/ui/button";
+import { HeaderLayout } from "@/components/layout/HeaderLayout";
 import DataTable from "@/features/ui/table/DataTable";
+import { TableToolbar } from "@/features/ui/table/TableToolbar";
+import { FilterBox } from "@/features/ui/filter-box/FilterBox";
+import { SearchInput } from "@/features/ui/input/SearchInput";
+import Select from "@/features/ui/select/Select";
+import { Button } from "@/features/ui/button/Button";
+
 import { getTaskColumns } from "@/features/tasks/columns/taskColumns";
 import CreateTaskDialog from "@/features/tasks/components/CreateTaskDialog";
 import EditTaskDialog from "../components/EditTaskDialog";
 import { DeleteTaskDialog } from "../components/DeleteTaskDialog";
 import { TaskStatuses } from "../consts/taskConsts";
 import { useTasks } from "../hooks/useTasks";
-import { HeaderLayout } from "@/components/layout/HeaderLayout";
+
 
 export default function TasksPage() {
-
   const {
     task,
     selectedTask,
@@ -29,11 +34,24 @@ export default function TasksPage() {
     setSearch,
     setStatus,
     status,
+    totalTasks
   } = useTasks();
 
   const columns = getTaskColumns({
     onDeleteTask: deleteTask,
   });
+
+
+
+  const handleResetFilters = () => {
+    setSearch("");
+    setStatus("All" as (typeof TaskStatuses)[number]);
+  };
+
+  const statusOptions = TaskStatuses.map((item) => ({
+    label: item === "All" ? "All statuses" : item,
+    value: item,
+  }));
 
   return (
     <DashboardLayout>
@@ -53,48 +71,42 @@ export default function TasksPage() {
         onOpenChange={setDeleteDialogOpen}
         onContinue={handleDeleteConfirm}
       />
-      
-      <HeaderLayout title="Tasks" 
-                    subTitle="Track and manage your AI agent tasks." 
-                    icon={<ClipboardList size={24} />
-                    
-                    }>
-        
-       <Button onClick={() => setCreateDialogOpen(true)}>
-          Create Task
-        </Button>
+
+      <HeaderLayout
+        title="Tasks"
+        subTitle="Track and manage your AI agent tasks."
+        icon={<ClipboardList size={24} />}
+      >
+        <Button
+          title="Create Task"
+          icon={<Plus size={17} />}
+          onClick={() => setCreateDialogOpen(true)}
+        />
       </HeaderLayout>
-     
 
-      <div className="mb-6 flex flex-wrap gap-3">
-        <div className="relative min-w-[220px] flex-1">
-          <Search
-            size={17}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"
-          />
+      <FilterBox onReset={handleResetFilters}>
+        <SearchInput
+          label="Search"
+          placeholder="Search tasks"
+          value={search}
+          onChange={setSearch}
+        />
 
-          <input
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            placeholder="Search tasks..."
-            className="w-full rounded-lg border border-slate-800 bg-[#101827] py-2.5 pl-10 pr-4 text-sm outline-none focus:border-violet-500"
-          />
-        </div>
-
-        <select
+        <Select
+          label="Status"
           value={status}
-          onChange={(event) =>
-            setStatus(event.target.value as (typeof TaskStatuses)[number])
+          onChange={(value) =>
+            setStatus(value as (typeof TaskStatuses)[number])
           }
-          className="rounded-lg border border-slate-800 bg-[#101827] px-4 py-2.5 text-sm"
-        >
-          {TaskStatuses.map((item) => (
-            <option key={item} value={item}>
-              {item === "All" ? "All statuses" : item}
-            </option>
-          ))}
-        </select>
-      </div>
+          options={statusOptions}
+        />
+      </FilterBox>
+
+      <TableToolbar
+        filteredCount={filteredTasks.length}
+        totalCount={totalTasks}
+        itemName="tasks"
+      />
 
       <DataTable
         columns={columns}

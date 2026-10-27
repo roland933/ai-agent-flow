@@ -1,12 +1,12 @@
 
-import { Button } from "@/components/ui/button";
 import { useAgentStore } from "@/features/agents/store/agentStore";
 import { useTaskStore } from "@/features/tasks/store/taskStore";
 import { formatDate, formatDuration } from "@/helpers/format";
 import type { DataTableColumn } from "@/features/ui/table/types/data-table";
-import { statusStyles } from "../consts/statusStyles";
 import type { Execution } from "../types/execution";
-
+import StatusBadge from "@/features/ui/status/StatusBadge";
+import { TableActions } from "@/features/ui/table/TableActions";
+import { Play, Square } from "lucide-react";
 type ExecutionColumnActions = {
   onStart: (execution: Execution) => void;
   onStop: (execution: Execution) => void;
@@ -47,13 +47,8 @@ export function getExecutionColumns({
       key: "status",
       header: "Status",
       cell: (execution) => (
-        <span
-          className={`rounded-full px-2.5 py-1 text-xs font-medium ${
-            statusStyles[execution.status]
-          }`}
-        >
-          {execution.status}
-        </span>
+        <StatusBadge status={execution.status} />
+
       ),
     },
     {
@@ -71,30 +66,31 @@ export function getExecutionColumns({
     },
     {
       key: "id",
-      header: "Actions",
+      header: "",
       cell: (execution) => (
-        <div className="flex items-center gap-2">
-          <Button
-            size="sm"
-            onClick={(event) => {
-              event.stopPropagation();
-              onStart(execution);
-            }}
-          >
-            Start
-          </Button>
+        <TableActions
+          actions={[
+            {
+              className:"text-emerald-400 hover:bg-emerald-400/10 hover:text-emerald-300",
+              key: `start-${execution.id}`,
+              label: `start`,
+              icon: <Play />,
+              onClick: () => onStart(execution),
+              visible: true,
+            
+            },
+            {
+              className:"text-rose-400 hover:bg-rose-400/10 hover:text-rose-300",
+              key: `stop-${execution.id}`,
+              label: `stop`,
+              icon: <Square />,
+              onClick: () => onStop(execution),
+              visible: true,
 
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={(event) => {
-              event.stopPropagation();
-              onStop(execution);
-            }}
-          >
-            Stop
-          </Button>
-        </div>
+            },
+          ]}
+        />
+
       ),
     },
   ];
