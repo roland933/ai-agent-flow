@@ -8,24 +8,15 @@ import { FormInput } from "@/features/ui/form/FormInput";
 import { FormSelect } from "@/features/ui/form/FormSelect";
 import { FormTextarea } from "@/features/ui/form/FormTextarea";
 import { Button } from "@/features/ui/button/Button";
+import AgentTypeSelect from "@/components/common/ui/AgentTypeSelect";
+import AgentModelSelect from "@/components/common/ui/AgentModelSelect";
 
 type CreateAgentDialogProps = {
   open: boolean;
   onClose: () => void;
 };
 
-const typeOptions = [
-  { label: "Research", value: "Research" },
-  { label: "Code", value: "Code" },
-  { label: "Content", value: "Content" },
-  { label: "Data", value: "Data" },
-];
 
-const modelOptions = [
-  { label: "GPT-4.1", value: "GPT-4.1" },
-  { label: "Claude", value: "Claude" },
-  { label: "Local model", value: "Local model" },
-];
 
 export default function CreateAgentDialog({
   open,
@@ -113,20 +104,15 @@ export default function CreateAgentDialog({
         />
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <FormSelect
-            id="agent-type"
-            label="Agent type"
+          <AgentTypeSelect
             value={type}
             onChange={setType}
-            options={typeOptions}
+           
           />
 
-          <FormSelect
-            id="agent-model"
-            label="Model"
+          <AgentModelSelect
             value={model}
             onChange={setModel}
-            options={modelOptions}
           />
         </div>
       </form>

@@ -37,7 +37,7 @@ export default function NumberInput({
         min={min}
         max={max}
         step={step}
-        className="w-full rounded-xl border border-white/[0.08] bg-white/[0.025] px-3 py-2.5 text-sm text-slate-100 outline-none transition-colors placeholder:text-slate-500 focus:border-emerald-400/40 focus:ring-2 focus:ring-emerald-400/[0.08]"
+        className="w-full rounded-xl border border-white/[0.08] bg-white/[0.025] px-3 py-2.5 text-sm text-slate-100 outline-none transition-colors placeholder:text-slate-300 focus:border-emerald-400/40 focus:ring-2 focus:ring-emerald-400/[0.08]"
       />
     </div>
   );

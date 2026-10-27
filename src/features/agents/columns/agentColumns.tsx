@@ -1,7 +1,6 @@
 import { Bot, Pencil, Trash2,Eye } from "lucide-react";
 import type { Agent } from "@/features/agents/types/agent";
 import type { DataTableColumn } from "@/features/ui/table/types/data-table";
-import { Button } from "@/components/ui/button";
 import StatusBadge from "@/features/ui/status/StatusBadge";
 import { TableActions } from "@/features/ui/table/TableActions";
 
@@ -31,6 +30,11 @@ export function getAgentColumns({
           {agent.name}
         </button>
       ),
+    },
+     {
+      key: "type",
+      header: "Agent type",
+     
     },
     {
       key: "description",

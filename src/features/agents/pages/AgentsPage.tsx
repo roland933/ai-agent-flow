@@ -19,6 +19,8 @@ import { TableToolbar } from "@/features/ui/table/TableToolbar";
 import {
   Bot,
 } from "lucide-react";
+import AgentTypeSelect from "@/components/common/ui/AgentTypeSelect";
+import AgentModelSelect from "@/components/common/ui/AgentModelSelect";
 
 export default function AgentsPage() {
   const agents = useAgentStore((state) => state.agents);
@@ -31,6 +33,8 @@ export default function AgentsPage() {
   const [createOpen, setCreateOpen] = useState<boolean>(false);
   const [editingAgent, setEditingAgent] = useState<Agent | null>(null);
   const [model, setModel] = useState<string>("All");
+  const [type, setType] = useState<string>("All");
+
   const [minTasks, setMinTasks] = useState("");
   const models = [
   { label: "All models", value: "All" },
@@ -128,11 +132,14 @@ export default function AgentsPage() {
             ]}
           />
 
-          <Select
-            label="Models"
+         <AgentModelSelect
             value={model}
             onChange={setModel}
-            options={models}
+          />
+
+          <AgentTypeSelect
+            value={type}
+            onChange={setType}
           />
 
 

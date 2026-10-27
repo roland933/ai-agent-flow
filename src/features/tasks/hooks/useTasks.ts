@@ -11,7 +11,7 @@ export function useTasks() {
   const [createDialogOpen, setCreateDialogOpen] = useState<boolean>(false);
   const [search, setSearch] = useState<string>("");
   const [status, setStatus] = useState<(typeof TaskStatuses)[number]>("All");
-
+    const [agent, setAgent] = useState<string>("All")
   const tasks = useTaskStore((state) => state.tasks);
 
   const deleteTaskFromStore = useTaskStore((state) => state.deleteTask);
@@ -78,6 +78,8 @@ export function useTasks() {
       const matchesStatus =
         status === "All" || task.status === (status as TaskStatus);
 
+    
+
       return matchesSearch && matchesStatus;
     });
   }, [search, status, tasks]);
@@ -108,7 +110,9 @@ export function useTasks() {
     setSearch,
     status,
     handleStartTask,
-    totalTasks
+    totalTasks,
+    agent,
+    setAgent,
 
   };
 }

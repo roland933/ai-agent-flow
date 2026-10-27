@@ -33,6 +33,7 @@ export const agents = [
     description: "Web research and information gathering",
     status: "Running",
     model: "GPT-4.1",
+    type:"Research",
     tasksCompleted: 128,
   },
   {
@@ -41,6 +42,7 @@ export const agents = [
     description: "Code analysis and generation",
     status: "Idle",
     model: "GPT-4.1",
+    type:"Coding",
     tasksCompleted: 86,
   },
   {

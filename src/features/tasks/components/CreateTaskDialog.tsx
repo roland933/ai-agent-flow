@@ -9,6 +9,7 @@ import { Dialog } from "@/features/ui/dialog/Dialog";
 import { FormInput } from "@/features/ui/form/FormInput";
 import { FormSelect } from "@/features/ui/form/FormSelect";
 import { FormTextarea } from "@/features/ui/form/FormTextarea";
+import AgentSelect from "@/components/common/ui/AgentSelect";
 
 type CreateTaskDialogProps = {
   open: boolean;
@@ -58,7 +59,7 @@ export default function CreateTaskDialog({ open, onOpenChange }: CreateTaskDialo
       onOpenChange={onOpenChange}
       title="Create a new task"
       description="Define a task and optionally assign it to an agent."
-    
+
       footer={
         <>
           <Button
@@ -90,14 +91,12 @@ export default function CreateTaskDialog({ open, onOpenChange }: CreateTaskDialo
           required
         />
 
-        <FormSelect
-          id="task-agent"
-          label="Assign agent"
+        <AgentSelect
           value={agentId}
           onChange={setAgentId}
-          options={agentOptions}
-          placeholder="Select an agent"
+          includeUnassigned
         />
+
 
         <FormTextarea
           id="task-description"

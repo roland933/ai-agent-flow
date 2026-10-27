@@ -15,6 +15,8 @@ import EditTaskDialog from "../components/EditTaskDialog";
 import { DeleteTaskDialog } from "../components/DeleteTaskDialog";
 import { TaskStatuses } from "../consts/taskConsts";
 import { useTasks } from "../hooks/useTasks";
+import AgentSelect from "@/components/common/ui/AgentSelect";
+import { useState } from "react";
 
 
 export default function TasksPage() {
@@ -34,13 +36,14 @@ export default function TasksPage() {
     setSearch,
     setStatus,
     status,
-    totalTasks
+    totalTasks,
+    agent,
+    setAgent
   } = useTasks();
 
   const columns = getTaskColumns({
     onDeleteTask: deleteTask,
   });
-
 
 
   const handleResetFilters = () => {
@@ -100,6 +103,10 @@ export default function TasksPage() {
           }
           options={statusOptions}
         />
+
+        <AgentSelect  value={agent} onChange={setAgent}/>
+
+
       </FilterBox>
 
       <TableToolbar
