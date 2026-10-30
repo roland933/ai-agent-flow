@@ -6,9 +6,8 @@ from sqlalchemy.exc import SQLAlchemyError
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-
 from app.db.session import engine,get_db
-from app.models import Agent
+from app.api.routes.agents import router as agents_router
 
 app = FastAPI(
     title="AgentFlow API",
@@ -16,6 +15,7 @@ app = FastAPI(
     version="0.1.0",
 )
 
+app.include_router(agents_router)
 
 @app.get("/health", tags=["Health"])
 def health_check():
@@ -24,39 +24,10 @@ def health_check():
         "service": "agentflow-api",
     }
 
-@app.get("/hello/{name}")
-def say_hello(name:str):
-    return {
-        "message":f"hello,{name}!",
-    }
-
 @app.get("/db-test")
 def db_test(db: Session = Depends(get_db)):
     return {
         "message": "Database session received successfully"
-    }
-
-class AgenCreate(BaseModel):
-    name:str
-    agent_type:str
-
-@app.post("/agents")
-def create_agent(agent:AgenCreate, db:Session=Depends(get_db)):
-    new_agent = Agent(
-        name=agent.name,
-        agent_type = agent.agent_type
-    )
-    db.add(new_agent)
-    db.commit()
-    db.refresh(new_agent)
-
-    return {
-        "message": "Agent created successfully",
-        "agent": {
-            "id": new_agent.id,
-            "name": new_agent.name,
-            "agent_type": new_agent.agent_type,
-        },
     }
 
 
