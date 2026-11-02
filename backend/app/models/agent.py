@@ -16,4 +16,8 @@ class Agent(Base):
 
     agent_type: Mapped["AgentType"] = relationship(back_populates="agents")
 
+    assignments: Mapped[list["AgentAssignment"]] = relationship(
+    back_populates="agent"
+)
+
 

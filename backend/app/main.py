@@ -3,12 +3,12 @@ import os
 from fastapi import FastAPI, HTTPException,Depends
 from sqlalchemy import  text
 from sqlalchemy.exc import SQLAlchemyError
-from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app.db.session import engine,get_db
 from app.api.routes.agents import router as agents_router
 from app.api.routes.agent_types import router as agents_types_router
+from app.api.routes.tasks import router as task_router
 
 app = FastAPI(
     title="AgentFlow API",
@@ -18,6 +18,7 @@ app = FastAPI(
 
 app.include_router(agents_router)
 app.include_router(agents_types_router)
+app.include_router(task_router)
 
 @app.get("/health", tags=["Health"])
 def health_check():
