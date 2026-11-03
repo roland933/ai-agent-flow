@@ -5,6 +5,10 @@ class AgentCreate(BaseModel):
     name: str
     agent_type_id: int
 
+class AgentUpdate(BaseModel):
+    name: str
+    agent_type_id: int
+
 class AgentTypeResponse(BaseModel):
     id: int
     name: str

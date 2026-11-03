@@ -9,6 +9,7 @@ from app.db.session import engine,get_db
 from app.api.routes.agents import router as agents_router
 from app.api.routes.agent_types import router as agents_types_router
 from app.api.routes.tasks import router as task_router
+from app.api.routes.agent_assignment import router as agent_assignment_router
 
 app = FastAPI(
     title="AgentFlow API",
@@ -19,6 +20,7 @@ app = FastAPI(
 app.include_router(agents_router)
 app.include_router(agents_types_router)
 app.include_router(task_router)
+app.include_router(agent_assignment_router)
 
 @app.get("/health", tags=["Health"])
 def health_check():
