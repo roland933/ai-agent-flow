@@ -6,7 +6,7 @@ from app.schemas.agent_assignment import (
     AgentAssignmentCreate,
     AgentAssignmentResponse,
 )
-from app.services.agent_assignment_service import agent_assignment_service
+from backend.app.services.agent.agent_assignment_service import agent_assignment_service
 
 router = APIRouter(
     prefix="/agent-assignments",

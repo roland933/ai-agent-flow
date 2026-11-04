@@ -1,5 +1,5 @@
 from app.db.session import SessionLocal
-from app.services.agent_type_service import create_agent_type
+from backend.app.services.agent.agent_type_service import create_agent_type
 
 
 db = SessionLocal()

@@ -5,7 +5,7 @@ from app.models import Agent,AgentAssignment
 from app.schemas.agent_assignment import AgentAssignmentCreate,AgentAssignmentUpdate
 from app.services.task_service import task_service
 from app.services.base_service import BaseService
-from app.services.agent_service import agent_service
+from backend.app.services.agent.agent_service import agent_service
 
 class AgentAssignmentService(
     BaseService[AgentAssignment, AgentAssignmentCreate, AgentAssignmentUpdate]

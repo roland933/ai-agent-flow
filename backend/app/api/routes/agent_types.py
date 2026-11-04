@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from app.db.session import get_db
 from app.models import AgentType
 from app.schemas.agent import  AgentTypeCreate,AgentTypeResponse,AgenTypeUpdate
-from app.services.agent_type_service import (
+from backend.app.services.agent.agent_type_service import (
     create_agent_type,
     get_agent_types as get_agent_types_service,
     get_agent_type_by_id,
