@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
-from backend.app.services.agent.agent_service import agent_service
+from app.services.agent.agent_service import agent_service
 from app.schemas.agent import AgentCreate, AgentResponse
 
 router = APIRouter(
