@@ -24,7 +24,7 @@ class WorkflowService:
             )
 
         return assignments
-    def execute_worklow(self,db:Session, task_id:int):
+    def execute_workflow(self,db:Session, task_id:int):
 
         task = task_service.get_by_id(db,task_id)
 
@@ -37,6 +37,7 @@ class WorkflowService:
         assignments = self.get_workflow_assignments(db,task_id)
         previous_output = None
         task.status = ExecutionStatus.IN_PROGRESS
+
         try:
             db.commit()
             db.refresh(task)
@@ -44,46 +45,40 @@ class WorkflowService:
             db.rollback()
             raise
 
-        for assignment in assignments:
-            assignment.input_data = previous_output
-            assignment.status = ExecutionStatus.IN_PROGRESS
+        try:    
+            for assignment in assignments:
+                assignment.input_data = previous_output
+                assignment.status = ExecutionStatus.IN_PROGRESS
 
-            try:
                 db.commit()
                 db.refresh(assignment)
-            except Exception:
-                db.rollback()
-                raise
 
+            
+                assignment.output_data = {
+                    "result": f"{assignment.title} completed successfully.",
+                    "agent_id": assignment.agent_id,
+                }
 
-            assignment.output_data = {
-                "result": f"{assignment.title} completed successfully.",
-                "agent_id": assignment.agent_id,
-            }
+                assignment.status = ExecutionStatus.COMPLETED
 
-            assignment.status = ExecutionStatus.COMPLETED
-                
-            try:
                 db.commit()
                 db.refresh(assignment)
-            except Exception:
-                db.rollback()
-                db.commit()
-                raise
+                    
 
-            previous_output = assignment.output_data
+                previous_output = assignment.output_data
 
-       
-
-       
-        try:
-            db.commit()
-            db.refresh(task)
         except Exception:
-            db.rollback()
-            task.status = ExecutionStatus.FAILED
-            db.commit()
-            raise
+              db.rollback()
+              assignment.status = ExecutionStatus.FAILED
+              task.status = ExecutionStatus.FAILED
+              db.commit()
+              raise
+              
+        task.status = ExecutionStatus.COMPLETED
+        db.commit()
+        db.refresh(task)
+
+    
 
 
 

@@ -37,4 +37,4 @@ def run_task(
     task_id: int,
     db: Session = Depends(get_db),
 ):
-    return workflow_service.execute_worklow(db, task_id)
+    return workflow_service.execute_workflow(db, task_id)
