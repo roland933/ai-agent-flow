@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from app.db.session import get_db
 from app.schemas.task import TaskCreate,TaskResponse,TaskUpdate
 from app.services.task_service import task_service
-
+from app.services.workflow_service import workflow_service
 router = APIRouter(
     prefix="/tasks",
     tags=["Tasks"],
@@ -30,3 +30,11 @@ def update_task_endpoint(
 @router.get("/", response_model=list[TaskResponse])
 def get_tasks_endpoint(db: Session = Depends(get_db)):
     return task_service.get_all(db)
+
+
+@router.post("/{task_id}/run")
+def run_task(
+    task_id: int,
+    db: Session = Depends(get_db),
+):
+    return workflow_service.execute_worklow(db, task_id)
