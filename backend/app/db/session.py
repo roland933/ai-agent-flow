@@ -28,3 +28,11 @@ def get_db():
         db.close()
 
 
+def get_background_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+

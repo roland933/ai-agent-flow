@@ -1,9 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, BackgroundTasks
 from sqlalchemy.orm import Session
 from app.db.session import get_db
 from app.schemas.task import TaskCreate,TaskResponse,TaskUpdate
 from app.services.task_service import task_service
 from app.services.workflow_service import workflow_service
+from app.schemas.workflow import WorkflowExecutionResponse
+
 router = APIRouter(
     prefix="/tasks",
     tags=["Tasks"],
@@ -32,9 +34,26 @@ def get_tasks_endpoint(db: Session = Depends(get_db)):
     return task_service.get_all(db)
 
 
-@router.post("/{task_id}/run")
+
+@router.post("/{task_id}/run", status_code=202)
 def run_task(
     task_id: int,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
 ):
-    return workflow_service.execute_workflow(db, task_id)
+    task_service.get_by_id(db, task_id)
+
+    background_tasks.add_task(
+        workflow_service.execute_workflow_background,
+        task_id,
+    )
+
+    return {
+        "task_id": task_id,
+        "status": "accepted",
+        "message": "Workflow execution started.",
+    }
+
+@router.get("/task_id/workflow",response_model=WorkflowExecutionResponse)
+def get_workflow_status(task_id:int,db:Session=Depends(get_db)):
+    return workflow_service.get_workflow_status(db,task_id)

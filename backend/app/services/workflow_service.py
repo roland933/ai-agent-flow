@@ -3,6 +3,8 @@ from fastapi import HTTPException
 from app.models import AgentAssignment
 from app.services.task_service import task_service
 from app.enums.status import ExecutionStatus
+from app.db.session import SessionLocal
+from app.schemas.workflow import WorkflowExecutionResponse, AssignmentResultResponse
 
 class WorkflowService:
 
@@ -24,7 +26,7 @@ class WorkflowService:
             )
 
         return assignments
-    def execute_workflow(self,db:Session, task_id:int):
+    def execute_workflow(self,db:Session, task_id:int)->WorkflowExecutionResponse:
 
         task = task_service.get_by_id(db,task_id)
 
@@ -68,15 +70,90 @@ class WorkflowService:
                 previous_output = assignment.output_data
 
         except Exception:
-              db.rollback()
-              assignment.status = ExecutionStatus.FAILED
-              task.status = ExecutionStatus.FAILED
-              db.commit()
-              raise
+            db.rollback()
+            task = task_service.get_by_id(db, task_id)
+            assignment = db.query(AgentAssignment).filter(
+                AgentAssignment.id == assignment.id
+            ).first()
+
+            assignment.status = ExecutionStatus.FAILED
+            task.status = ExecutionStatus.FAILED
+
+            db.commit()
+            db.refresh(task)
+
+            return WorkflowExecutionResponse(
+                task_id=task.id,
+                status=task.status,
+                message="Workflow execution failed.",
+                results=[
+                    AssignmentResultResponse(
+                        assignment_id=item.id,
+                        agent_id=item.agent_id,
+                        status=item.status,
+                        output=item.output_data,
+                    )
+                    for item in assignments
+                ],
+            )
               
+       
+
+
         task.status = ExecutionStatus.COMPLETED
+
         db.commit()
         db.refresh(task)
+
+        return WorkflowExecutionResponse(
+            task_id=task.id,
+            status=task.status,
+            message="Workflow executed successfully.",
+            results=[
+                AssignmentResultResponse(
+                    assignment_id=assignment.id,
+                    agent_id=assignment.agent_id,
+                    status=assignment.status,
+                    output=assignment.output_data,
+                )
+                for assignment in assignments
+            ],
+        )
+
+    def execute_workflow_background(self, task_id: int):
+        db = SessionLocal()
+
+        try:
+            self.execute_workflow(db, task_id)
+        finally:
+            db.close()
+
+
+    def get_workflow_status(
+    self,
+    db: Session,
+    task_id: int
+) -> WorkflowExecutionResponse:
+
+        task = task_service.get_by_id(db, task_id)
+        assignments = self.get_workflow_assignments(db, task_id)
+
+        return WorkflowExecutionResponse(
+            task_id=task.id,
+            status=task.status,
+            message=f"Workflow status: {task.status.value}",
+            results=[
+                AssignmentResultResponse(
+                    assignment_id=item.id,
+                    agent_id=item.agent_id,
+                    status=item.status,
+                    output=item.output_data,
+                )
+                for item in assignments
+            ],
+        )
+
+
 
     
 
