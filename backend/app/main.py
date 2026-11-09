@@ -4,17 +4,26 @@ from fastapi import FastAPI, HTTPException,Depends
 from sqlalchemy import  text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
-
+from fastapi.middleware.cors import CORSMiddleware
 from app.db.session import engine,get_db
 from app.api.routes.agents import router as agents_router
 from app.api.routes.agent_types import router as agents_types_router
 from app.api.routes.tasks import router as task_router
 from app.api.routes.agent_assignment import router as agent_assignment_router
 
+
 app = FastAPI(
     title="AgentFlow API",
     description="Backend API for the AgentFlow platform.",
     version="0.1.0",
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 app.include_router(agents_router)

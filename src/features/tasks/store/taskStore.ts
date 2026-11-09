@@ -10,10 +10,13 @@ type TaskStore = {
   updateTask: (id: number, input: UpdateTaskInput) => void;
   updateTaskStatus: (id: number, status: TaskStatus) => void;
   deleteTask: (id: number) => void;
+  setTasks: (tasks: Task[]) => void;
 };
 
 export const useTaskStore = create<TaskStore>((set) => ({
   tasks: mockTasks,
+
+  setTasks:(tasks) => set({tasks}),
 
   createTask: (input) =>
     set((state) => ({

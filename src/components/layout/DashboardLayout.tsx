@@ -2,7 +2,7 @@
 import type { ReactNode } from "react";
 import { Bell } from "lucide-react";
 import AppSidebar from "@/components/layout/AppSidebar";
-
+import { useTasksQuery } from "@/features/tasks/hooks/useTasksQuery";
 type DashboardLayoutProps = {
   children: ReactNode;
 };
@@ -10,7 +10,9 @@ type DashboardLayoutProps = {
 export default function DashboardLayout({
   children,
 }: DashboardLayoutProps) {
+  const { isLoading, isError, error } = useTasksQuery();
   return (
+    
     <div className="relative min-h-screen overflow-hidden bg-[#080d12] text-slate-100">
       {/* Background image */}
       <div
