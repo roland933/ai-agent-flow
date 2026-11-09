@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { apiClient } from "@/api/client";
-import type { Task } from "../types/task";
 import { useTaskStore } from "../store/taskStore";
+import { mapApiTask, type ApiTask } from "../utils/taskAdapter";
 
 export function useTasksQuery() {
   const setTasks = useTaskStore((state) => state.setTasks);
@@ -9,7 +9,9 @@ export function useTasksQuery() {
   return useQuery({
     queryKey: ["tasks"],
     queryFn: async () => {
-      const tasks = await apiClient<Task[]>("/tasks");
+      const data = await apiClient<ApiTask[]>("/tasks");
+
+      const tasks = data.map(mapApiTask);
 
       setTasks(tasks);
 
