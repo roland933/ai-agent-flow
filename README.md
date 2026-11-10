@@ -1,32 +1,166 @@
-# React + TypeScript + Vite
+# AgentFlow – AI Agent Workflow Dashboard
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+AgentFlow is a full-stack web application for managing AI agents, organizing tasks, and monitoring workflow executions through a centralized dashboard.
 
-Currently, two official plugins are available:
+The project aims to provide a structured environment where users can manage agents, assign them to tasks, and execute multi-step workflows while tracking their progress and results.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Features
 
-## React Compiler
+- **Dashboard Overview** – View key statistics and get an overview of tasks, agents, and executions.
+- **Agent Management** – Browse and manage available AI agents.
+- **Task Management** – Create, organize, and manage tasks with different execution statuses.
+- **Agent Assignments** – Assign agents to tasks and define their execution order.
+- **Workflow Execution** – Execute multi-step workflows where agents process tasks sequentially.
+- **Execution Monitoring** – Track workflow and individual assignment statuses, including pending, in-progress, completed, and failed states.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Tech Stack
 
-## Expanding the Oxlint configuration
+### Frontend
+- React
+- TypeScript
+- Vite
+- Tailwind CSS
+- shadcn/ui
+- Zustand
+- TanStack Query (React Query)
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
+### Backend
+- Python
+- FastAPI
+- SQLAlchemy
+- Alembic
+- Pydantic
 
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+### Database & Infrastructure
+- PostgreSQL
+- Docker
+- Docker Compose
+
+## Architecture
+
+AgentFlow uses a separated frontend and backend architecture.
+
+Frontend (React + TypeScript)
+        |
+        | HTTP / REST API
+        |
+Backend (FastAPI)
+        |
+        | SQLAlchemy
+        |
+PostgreSQL Database
+
+
+The frontend communicates with the backend through REST API endpoints. The backend handles business logic, database operations, agent assignments, and workflow execution.
+
+Long-running workflow execution is handled using FastAPI background tasks, allowing the API to respond immediately while the workflow continues processing.
+
+## Project Structure
+
+
+AgentFlow/
+│    src/
+│       ├── api/
+│       ├── components/
+│       ├── features/
+│       ├── hooks/
+│       └── ...
+│
+├── backend/
+│   └── app/
+│       ├── api/
+│       │   └── routes/
+│       ├── db/
+│       ├── enums/
+│       ├── models/
+│       ├── schemas/
+│       └── services/
+│
+└── docker-compose.yml
+
+
+*The structure above is a simplified overview of the main application modules.*
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js and npm
+- Python 3.12
+- Docker and Docker Compose
+
+### Backend Setup
+
+1. Navigate to the backend directory.
+2. Configure the required environment variables in your `.env` file.
+3. Start the backend services:
+
+```bash
+docker-compose up --build
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+The FastAPI application will be available at:
+
+
+http://localhost:8000
+
+
+Interactive API documentation:
+
+
+http://localhost:8000/docs
+
+
+### Frontend Setup
+
+1. Navigate to the frontend directory.
+2. Install dependencies:
+
+```bash
+npm install
+```
+
+3. Start the development server:
+
+```bash
+npm run dev
+```
+
+The frontend will be available at:
+
+
+http://localhost:5173
+
+
+## API
+
+The backend exposes REST API endpoints for managing agents, tasks, assignments, and workflow execution.
+
+Main endpoint groups include:
+
+- `/agents` – Agent management
+- `/agent-types` – Agent type management
+- `/tasks` – Task management and workflow execution
+- `/agent-assignments` – Agent assignment management
+
+For detailed endpoint documentation, visit the FastAPI Swagger UI at `/docs`.
+
+## Current Development Status
+
+AgentFlow is an actively developed project.
+
+The core backend architecture, database models, task management endpoints, and workflow execution logic are being developed alongside the frontend API integration.
+
+Some functionality may still be under development or use simulated agent execution results.
+
+## Future Improvements
+
+- Integration with real AI models and external AI APIs.
+- Advanced workflow configuration.
+- Improved execution history and monitoring.
+- More detailed agent configuration.
+- Authentication and user management.
+- Enhanced error handling and execution recovery.
+
+
+**AgentFlow** – A centralized dashboard for managing AI agents and orchestrating workflows.

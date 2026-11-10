@@ -1,6 +1,11 @@
-import { apiClient } from "../../../api/client";
-import type { Task } from "../types/task";
+import { apiClient } from "@/api/client";
+import { taskEndpoints } from "./endpoints"
+import type { ApiTask } from "../utils/taskAdapter";
 
 export const getTasks = () => {
-  return apiClient<Task[]>("/tasks");
+  return apiClient<ApiTask[]>(taskEndpoints.all);
+};
+
+export const getTask = (id: number) => {
+  return apiClient<ApiTask>(taskEndpoints.byId(id));
 };
