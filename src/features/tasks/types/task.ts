@@ -14,7 +14,6 @@ export type Task = {
 export type CreateTaskInput = {
   title: string;
   description: string;
-  agentId: number | null;
 };
 
 export type UpdateTaskInput = CreateTaskInput & {

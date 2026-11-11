@@ -1,7 +1,7 @@
 
 import { create } from "zustand";
 
-import { mockTasks } from "@/features/tasks/data/mock-tasks";
+
 import type { CreateTaskInput, Task, TaskStatus,UpdateTaskInput } from "@/features/tasks/types/task";
 
 type TaskStore = {
@@ -14,7 +14,7 @@ type TaskStore = {
 };
 
 export const useTaskStore = create<TaskStore>((set) => ({
-  tasks: mockTasks,
+  tasks: [],
 
   setTasks:(tasks) => set({tasks}),
 

@@ -1,15 +1,12 @@
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
 import { Button } from "@/features/ui/button/Button";
 
-import { useAgentStore } from "@/features/agents/store/agentStore";
-import { useTaskStore } from "@/features/tasks/store/taskStore";
 import { Dialog } from "@/features/ui/dialog/Dialog";
 import { FormInput } from "@/features/ui/form/FormInput";
-import { FormSelect } from "@/features/ui/form/FormSelect";
 import { FormTextarea } from "@/features/ui/form/FormTextarea";
-import AgentSelect from "@/components/common/ui/AgentSelect";
+import { useCreateTask } from "@/features/tasks/hooks/useCreateTask";
 
 type CreateTaskDialogProps = {
   open: boolean;
@@ -17,40 +14,29 @@ type CreateTaskDialogProps = {
 };
 
 export default function CreateTaskDialog({ open, onOpenChange }: CreateTaskDialogProps) {
-  const agents = useAgentStore((state) => state.agents);
-  const createTask = useTaskStore((state) => state.createTask);
-
+  const createTaskMutation = useCreateTask();
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [agentId, setAgentId] = useState("unassigned");
-
-  const agentOptions = useMemo(
-    () => [
-      { label: "Unassigned", value: "unassigned" },
-      ...agents.map((agent) => ({
-        label: agent.name,
-        value: String(agent.id),
-      })),
-    ],
-    [agents],
-  );
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    if (!title.trim()) return;
+    
 
-    createTask({
-      title,
-      description,
-      agentId: agentId ? Number(agentId) : null,
-    });
-
-    setTitle("");
-    setDescription("");
-    setAgentId("");
-    onOpenChange(false)
+   createTaskMutation.mutate(
+      {
+        title: title.trim(),
+        description: description.trim() || undefined,
+      },
+      {
+        onSuccess: () => {
+          setTitle("");
+          setDescription("");
+          onOpenChange(false);
+        },
+      },
+    );
   }
 
   return (
@@ -88,16 +74,10 @@ export default function CreateTaskDialog({ open, onOpenChange }: CreateTaskDialo
           value={title}
           onChange={setTitle}
           placeholder="e.g. Research a topic"
-          required
+          
         />
 
-        <AgentSelect
-          value={agentId}
-          onChange={setAgentId}
-          includeUnassigned
-        />
-
-
+        
         <FormTextarea
           id="task-description"
           label="Description"
