@@ -22,5 +22,13 @@ class TaskResponse(BaseModel):
 
 class TaskUpdate(BaseModel):
     title: str | None = None
-    description: str | None = None    
+    description: str | None = None
+
+    @field_validator("title")
+    @classmethod
+    def validate_title(cls, value: str | None) -> str | None:
+        if value is None:
+            return value
+
+        return validate_not_empty(value)
     

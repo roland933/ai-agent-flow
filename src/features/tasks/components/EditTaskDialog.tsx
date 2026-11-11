@@ -7,9 +7,9 @@ import type { Task, TaskStatus } from "@/features/tasks/types/task";
 
 import { Dialog } from "@/features/ui/dialog/Dialog";
 import { FormInput } from "@/features/ui/form/FormInput";
-import { FormSelect } from "@/features/ui/form/FormSelect";
 import { FormTextarea } from "@/features/ui/form/FormTextarea";
 import { Button } from "@/features/ui/button/Button";
+import { useUpdateTask } from "../hooks/useUpdateTask";
 
 type EditTaskDialogProps = {
   task: Task | null;
@@ -17,46 +17,21 @@ type EditTaskDialogProps = {
   onOpenChange: (open: boolean) => void;
 };
 
-const statusOptions: { label: string; value: string }[] = [
-  { label: "Pending", value: "Pending" },
-  { label: "Running", value: "Running" },
-  { label: "Completed", value: "Completed" },
-  { label: "Failed", value: "Failed" },
-];
-
 export default function EditTaskDialog({
   task,
   open,
   onOpenChange,
 }: EditTaskDialogProps) {
-  const agents = useAgentStore((state) => state.agents);
-  const updateTask = useTaskStore((state) => state.updateTask);
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [agentId, setAgentId] = useState("unassigned");
-  const [status, setStatus] = useState<TaskStatus>("Pending");
-
-  const agentOptions = useMemo(
-    () => [
-      { label: "Unassigned", value: "unassigned" },
-      ...agents.map((agent) => ({
-        label: agent.name,
-        value: String(agent.id),
-      })),
-    ],
-    [agents],
-  );
-
+  const updateTaskMutation = useUpdateTask();
   useEffect(() => {
     if (!task) return;
 
     setTitle(task.title);
     setDescription(task.description);
-    setAgentId(
-      task.agentId === null ? "unassigned" : String(task.agentId),
-    );
-    setStatus(task.status);
+
   }, [task]);
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -64,11 +39,17 @@ export default function EditTaskDialog({
 
     if (!task || !title.trim()) return;
 
-    updateTask(task.id, {
-      title,
-      description,
-      agentId: agentId === "unassigned" ? null : Number(agentId),
-      status,
+
+    updateTaskMutation.mutate({
+      id: task.id,
+      data: {
+        title: title.trim(),
+        description: description.trim() || null,
+      },
+    }, {
+      onSuccess: () => {
+        onOpenChange(false);
+      },
     });
 
     onOpenChange(false);
@@ -120,22 +101,7 @@ export default function EditTaskDialog({
           rows={4}
         />
 
-        <FormSelect
-          id="edit-task-agent"
-          label="Assigned agent"
-          value={agentId}
-          onChange={setAgentId}
-          options={agentOptions}
-          placeholder="Select an agent"
-        />
 
-        <FormSelect
-          id="edit-task-status"
-          label="Status"
-          value={status}
-          onChange={(value) => setStatus(value as TaskStatus)}
-          options={statusOptions}
-        />
       </form>
     </Dialog>
   );

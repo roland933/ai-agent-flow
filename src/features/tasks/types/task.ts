@@ -16,8 +16,9 @@ export type CreateTaskInput = {
   description: string;
 };
 
-export type UpdateTaskInput = CreateTaskInput & {
-  status: TaskStatus;
-};
+export interface UpdateTaskInput {
+  title?: string;
+  description?: string | null;
+}
 
 
