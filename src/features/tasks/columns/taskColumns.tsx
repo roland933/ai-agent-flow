@@ -81,7 +81,7 @@ export function getTaskColumns({
               label: `Delete `,
               icon: <Trash2 size={16} />,
               onClick: () => onDeleteTask(task),
-              visible: true,
+              visible: task.status !== "Completed",
 
             },
             
