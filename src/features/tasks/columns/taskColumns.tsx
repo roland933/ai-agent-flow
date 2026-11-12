@@ -1,5 +1,5 @@
 
-import { Trash2 } from "lucide-react";
+import { Trash2,UserPlus } from "lucide-react";
 import { useAgentStore } from "@/features/agents/store/agentStore";
 import type { DataTableColumn } from "@/features/ui/table/types/data-table";
 import type { Task } from "../types/task";
@@ -8,10 +8,12 @@ import StatusBadge from "@/features/ui/status/StatusBadge";
 
 type TaskColumnActions = {
   onDeleteTask: (task: Task) => void;
+  onAssignAgent:(task:Task) => void
 };
 
 export function getTaskColumns({
   onDeleteTask,
+  onAssignAgent,
 }: TaskColumnActions): DataTableColumn<Task>[] {
   const agents = useAgentStore.getState().agents;
 
@@ -66,6 +68,14 @@ export function getTaskColumns({
       cell: (task) => (
         <TableActions
           actions={[
+              {
+              key:  `Assign ${task.title}`,
+              label: `Assign`,
+              icon: <UserPlus size={16} />,
+              onClick: () => onAssignAgent(task),
+              visible: true,
+
+            },
             {
               key:  `Delete ${task.title}`,
               label: `Delete `,
@@ -74,6 +84,7 @@ export function getTaskColumns({
               visible: true,
 
             },
+            
           ]}
         />
 
