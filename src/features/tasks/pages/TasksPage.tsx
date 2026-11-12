@@ -16,7 +16,6 @@ import { DeleteTaskDialog } from "../components/DeleteTaskDialog";
 import { TaskStatuses } from "../consts/taskConsts";
 import { useTasks } from "../hooks/useTasks";
 import AgentSelect from "@/components/common/ui/AgentSelect";
-import { useState } from "react";
 
 
 export default function TasksPage() {

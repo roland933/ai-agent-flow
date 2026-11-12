@@ -79,7 +79,12 @@ class BaseService(Generic[T,CreateSchema,UpdateSchema]):
     id: int,
     detail_message: str = "Not found",
 ) -> None:
-        model = self.get_by_id(db, id, detail_message)
+            try:
+                model = self.get_by_id(db, id, detail_message)
 
-        db.delete(model)
-        db.commit()
+                db.delete(model)
+                db.commit()
+              
+            except Exception:
+                db.rollback()
+                raise

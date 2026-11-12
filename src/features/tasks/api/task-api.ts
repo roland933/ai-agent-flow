@@ -18,10 +18,15 @@ export const createTask = (data: CreateTaskInput) => {
   })
 }
 
-
 export function updateTask(id: number, data: UpdateTaskInput) {
   return apiClient<ApiTask>(taskEndpoints.byId(id), {
     method: "PATCH",
     body: data,
+  });
+}
+
+export function deleteTask(id: number) {
+  return apiClient<void>(taskEndpoints.byId(id), {
+    method: "DELETE",
   });
 }

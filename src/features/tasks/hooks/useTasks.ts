@@ -3,6 +3,7 @@ import { useTaskStore } from "../store/taskStore";
 import type { Task, TaskStatus } from "../types/task";
 import type { TaskStatuses } from "../consts/taskConsts";
 import { useExecutionStore } from "@/features/executions/store/executionStore";
+import { useDeleteTask } from "./useDeleteTask";
 
 export function useTasks() {
   const [task, setTask] = useState<Task | null>(null);
@@ -11,14 +12,14 @@ export function useTasks() {
   const [createDialogOpen, setCreateDialogOpen] = useState<boolean>(false);
   const [search, setSearch] = useState<string>("");
   const [status, setStatus] = useState<(typeof TaskStatuses)[number]>("All");
-    const [agent, setAgent] = useState<string>("All")
+  const [agent, setAgent] = useState<string>("All")
   const tasks = useTaskStore((state) => state.tasks);
+  const deleteTaskMutation = useDeleteTask();
 
-  const deleteTaskFromStore = useTaskStore((state) => state.deleteTask);
 
   const executions = useExecutionStore((state) => state.executions);
 
-    const totalTasks = useTaskStore((state) => state.tasks.length);
+  const totalTasks = useTaskStore((state) => state.tasks.length);
 
   const selectedTask = (task: Task) => {
     setTask(task);
@@ -37,9 +38,12 @@ export function useTasks() {
   const handleDeleteConfirm = () => {
     if (!task) return;
 
-    deleteTaskFromStore(task.id);
-    setDeleteDialogOpen(false);
-    setTask(null);
+    deleteTaskMutation.mutate(task.id, {
+      onSuccess: () => {
+        setDeleteDialogOpen(false);
+        setTask(null);
+      },
+    });
   };
 
   const handleStartTask = (task: Task) => {
@@ -78,7 +82,7 @@ export function useTasks() {
       const matchesStatus =
         status === "All" || task.status === (status as TaskStatus);
 
-    
+
 
       return matchesSearch && matchesStatus;
     });

@@ -57,3 +57,11 @@ def run_task(
 @router.get("/task_id/workflow",response_model=WorkflowExecutionResponse)
 def get_workflow_status(task_id:int,db:Session=Depends(get_db)):
     return workflow_service.get_workflow_status(db,task_id)
+
+
+@router.delete("/{id}", status_code=204)
+def delete_task_endpoint(
+    id: int,
+    db: Session = Depends(get_db),
+):
+    task_service.delete(db, id)
