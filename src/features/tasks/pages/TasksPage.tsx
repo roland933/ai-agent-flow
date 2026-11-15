@@ -16,6 +16,7 @@ import { DeleteTaskDialog } from "../components/DeleteTaskDialog";
 import { TaskStatuses } from "../consts/taskConsts";
 import { useTasks } from "../hooks/useTasks";
 import AgentSelect from "@/components/common/ui/AgentSelect";
+import { AssignAgentDialog } from "../components/AssignAgentDialog";
 
 
 export default function TasksPage() {
@@ -37,11 +38,17 @@ export default function TasksPage() {
     status,
     totalTasks,
     agent,
-    setAgent
+    setAgent,
+    handleAssginAgentDialog,
+    assignAgentDialogOpen,
+    setAssignDialogOpen,
+    selectedTaskForAssignment,
+    handleAssignAgent
   } = useTasks();
 
   const columns = getTaskColumns({
     onDeleteTask: deleteTask,
+    onAssignAgent: handleAssginAgentDialog
   });
 
 
@@ -57,6 +64,12 @@ export default function TasksPage() {
 
   return (
     <DashboardLayout>
+      <AssignAgentDialog open={assignAgentDialogOpen} 
+                         onOpenChange={setAssignDialogOpen}  
+                         task={selectedTaskForAssignment} 
+                         onSubmit={handleAssignAgent}
+                         />
+
       <CreateTaskDialog
         open={createDialogOpen}
         onOpenChange={setCreateDialogOpen}

@@ -21,4 +21,12 @@ export interface UpdateTaskInput {
   description?: string | null;
 }
 
+export interface CreateAgentAssignmentInput {
+  task_id: number;
+  agent_id: number;
+  title: string;
+  description: string | null;
+  sequence: number;
+}
+
 

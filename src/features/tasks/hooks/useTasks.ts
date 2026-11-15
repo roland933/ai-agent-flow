@@ -4,18 +4,21 @@ import type { Task, TaskStatus } from "../types/task";
 import type { TaskStatuses } from "../consts/taskConsts";
 import { useExecutionStore } from "@/features/executions/store/executionStore";
 import { useDeleteTask } from "./useDeleteTask";
-
+import { useCreateAgentAssignment } from "./useCreateAgentAssignment";
 export function useTasks() {
   const [task, setTask] = useState<Task | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState<boolean>(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState<boolean>(false);
   const [createDialogOpen, setCreateDialogOpen] = useState<boolean>(false);
+  const [assignAgentDialogOpen, setAssignDialogOpen] = useState<boolean>(false)
+  const [selectedTaskForAssignment, setSelectedTaskForAssignment] =
+    useState<Task | null>(null);
   const [search, setSearch] = useState<string>("");
   const [status, setStatus] = useState<(typeof TaskStatuses)[number]>("All");
   const [agent, setAgent] = useState<string>("All")
   const tasks = useTaskStore((state) => state.tasks);
   const deleteTaskMutation = useDeleteTask();
-
+  const createAgentAssignmentMutation = useCreateAgentAssignment();
 
   const executions = useExecutionStore((state) => state.executions);
 
@@ -63,6 +66,34 @@ export function useTasks() {
     updateExecutionStatus(executionId, "Running");
   };
 
+  const handleAssginAgentDialog = (task: Task) => {
+    setAssignDialogOpen(true);
+    setSelectedTaskForAssignment(task)
+  }
+
+const handleAssignAgent = (data: {
+  agentId: number;
+  title: string;
+  description: string;
+}) => {
+  if (!selectedTaskForAssignment) return;
+
+  createAgentAssignmentMutation.mutate(
+    {
+      task_id: selectedTaskForAssignment.id,
+      agent_id: data.agentId,
+      title: data.title,
+      description: data.description || null,
+      sequence: 1, // Ideiglenes
+    },
+    {
+      onSuccess: () => {
+        setAssignDialogOpen(false);
+        setSelectedTaskForAssignment(null);
+      },
+    },
+  );
+};
   const handleEditDialogChange = (open: boolean) => {
     setEditDialogOpen(open);
 
@@ -117,6 +148,11 @@ export function useTasks() {
     totalTasks,
     agent,
     setAgent,
+    handleAssginAgentDialog,
+    assignAgentDialogOpen,
+    setAssignDialogOpen,
+    selectedTaskForAssignment,
+    handleAssignAgent
 
   };
 }
