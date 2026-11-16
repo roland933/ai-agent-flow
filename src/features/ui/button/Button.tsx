@@ -6,7 +6,7 @@ type ButtonVariant = "primary" | "secondary" | "danger";
 
 type ButtonProps = {
   onClick?: () => void;
-  title: string;
+  title?: string;
   icon?: ReactNode;
   variant?: ButtonVariant;
   disabled?: boolean;

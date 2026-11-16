@@ -11,7 +11,7 @@ class TaskService(BaseService[Task, TaskCreate, TaskUpdate]):
 
     model = Task
 
-    def create(self, db: Session, data: TaskCreate):
+    def create(self, db: Session, data: TaskCreate) ->Task:
         validate_unique_field(
             db=db,
             model=Task,
@@ -22,7 +22,7 @@ class TaskService(BaseService[Task, TaskCreate, TaskUpdate]):
 
         return super().create(db, data)
 
-    def update(self,db: Session, id:int, data: TaskUpdate):
+    def update(self,db: Session, id:int, data: TaskUpdate) ->Task:
             validate_unique_field(
                         db=db,
                         model=Task,

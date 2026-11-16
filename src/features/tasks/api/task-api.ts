@@ -43,3 +43,9 @@ export function getAgentAssignments(taskId: number) {
     taskEndpoints.agentAssignmentsByTask(taskId)
   );
 }
+
+export function deleteAgentAssignment(id: number) {
+  return apiClient<void>(`/agent-assignments/${id}`, {
+    method: "DELETE",
+  });
+}

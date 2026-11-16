@@ -4,6 +4,9 @@ import { Dialog } from "@/features/ui/dialog/Dialog";
 import StatusBadge from "@/features/ui/status/StatusBadge";
 import { statusMap } from "../utils/taskAdapter";
 import type { Task } from "../types/task";
+import { Button } from "@/features/ui/button/Button";
+import { Trash2 } from "lucide-react";
+import { useDeleteAgentAssignment } from "../hooks/useDeleteAgentAssignment";
 
 type AgentAssignmentsDialogProps = {
   open: boolean;
@@ -23,6 +26,14 @@ export function AgentAssignmentsDialog({
   } = useAgentAssignmentsQuery(task?.id ?? null);
 
   const agents = useAgentStore((state) => state.agents);
+  const deleteAssignment = useDeleteAgentAssignment()
+
+  const handleDeleteAssignment = (id: number) => {
+    deleteAssignment.mutate({
+      id,
+      taskId: task!.id,
+    });
+  };
 
   return (
     <Dialog
@@ -84,6 +95,12 @@ export function AgentAssignmentsDialog({
 
                     <td className="px-3 py-3">
                       <StatusBadge status={statusMap[assignment.status]} />
+                    </td>
+                    <td className="px-3 py-3">
+                      {assignment.status == "pending" && (
+                           <Button icon={<Trash2 />} variant="secondary" onClick={() => handleDeleteAssignment(assignment.id)} />
+                      )}
+                     
                     </td>
                   </tr>
                 );
