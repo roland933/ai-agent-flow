@@ -6,7 +6,8 @@ class AgentAssignmentCreate(BaseModel):
     agent_id: int
     title: str
     description: str | None = None
-    sequence: int
+    sequence: int | None = None
+   
 
 class AgentAssignmentResponse(BaseModel):
     id: int

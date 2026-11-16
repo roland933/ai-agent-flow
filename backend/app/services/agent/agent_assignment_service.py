@@ -1,5 +1,6 @@
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 
 from app.models import Agent,AgentAssignment
 from app.schemas.agent_assignment import AgentAssignmentCreate,AgentAssignmentUpdate
@@ -19,21 +20,22 @@ class AgentAssignmentService(
     ):
         try:
             task_service.get_by_id(db, assignment_data.task_id)
-
             agent_service.get_by_id(db, assignment_data.agent_id)
 
-            existing_assignment = db.query(self.model).filter(
-                    self.model.task_id == assignment_data.task_id,
-                    self.model.sequence == assignment_data.sequence,
-                ).first()
+            max_sequence = (
+                db.query(func.max(self.model.sequence))
+                .filter(self.model.task_id == assignment_data.task_id)
+                .scalar()
+            )
 
-            if existing_assignment is not None:
-                raise HTTPException(
-                    status_code=409,
-                    detail="Sequence already exists for this task",
-                )
+            sequence = (max_sequence or 0) + 1
 
-            return super().create(db, assignment_data)
+            data = assignment_data.model_dump()
+            data["sequence"] = sequence
+
+            new_assignment = AgentAssignmentCreate.model_validate(data)
+
+            return super().create(db, new_assignment)
 
         except HTTPException:
             raise

@@ -2,14 +2,12 @@
 import { create } from "zustand";
 
 
-import type { CreateTaskInput, Task, TaskStatus,UpdateTaskInput } from "@/features/tasks/types/task";
+import type { Task, TaskStatus } from "@/features/tasks/types/task";
 
 type TaskStore = {
   tasks: Task[];
-  createTask: (input: CreateTaskInput) => void;
-  updateTask: (id: number, input: UpdateTaskInput) => void;
+
   updateTaskStatus: (id: number, status: TaskStatus) => void;
-  deleteTask: (id: number) => void;
   setTasks: (tasks: Task[]) => void;
 };
 
@@ -18,36 +16,6 @@ export const useTaskStore = create<TaskStore>((set) => ({
 
   setTasks:(tasks) => set({tasks}),
 
-  createTask: (input) =>
-    set((state) => ({
-      tasks: [
-        ...state.tasks,
-        {
-          id: Math.max(0, ...state.tasks.map((task) => task.id)) + 1,
-          title: input.title.trim(),
-          description: input.description.trim(),
-          agentId: input.agentId,
-          status: "Pending",
-          createdAt: new Date().toISOString(),
-        },
-      ],
-    })),
-
-  updateTask: (id, input) =>
-    set((state) => ({
-      tasks: state.tasks.map((task) =>
-        task.id === id
-          ? {
-              ...task,
-              title: input.title.trim(),
-              description: input.description.trim(),
-              agentId: input.agentId,
-              status: input.status,
-            }
-          : task,
-      ),
-    })),
-
   updateTaskStatus: (id, status) =>
     set((state) => ({
       tasks: state.tasks.map((task) =>
@@ -55,8 +23,5 @@ export const useTaskStore = create<TaskStore>((set) => ({
       ),
     })),
 
-  deleteTask: (id) =>
-    set((state) => ({
-      tasks: state.tasks.filter((task) => task.id !== id),
-    })),
+
 }));

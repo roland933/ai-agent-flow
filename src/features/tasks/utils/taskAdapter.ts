@@ -7,7 +7,7 @@ export type ApiTask = {
   status: string;
 };
 
-const statusMap: Record<string, TaskStatus> = {
+export const statusMap: Record<string, TaskStatus> = {
   pending: "Pending",
   in_progress: "Running",
   completed: "Completed",

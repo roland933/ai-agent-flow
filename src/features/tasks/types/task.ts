@@ -26,6 +26,22 @@ export interface CreateAgentAssignmentInput {
   agent_id: number;
   title: string;
   description: string | null;
+}
+
+
+export type AgentAssignmentStatus =
+  | "pending"
+  | "in_progress"
+  | "completed"
+  | "failed";
+
+export interface AgentAssignment {
+  id: number;
+  task_id: number;
+  agent_id: number;
+  title: string;
+  description: string | null;
+  status: AgentAssignmentStatus;
   sequence: number;
 }
 

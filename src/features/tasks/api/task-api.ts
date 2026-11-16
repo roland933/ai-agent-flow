@@ -1,7 +1,7 @@
 import { apiClient } from "@/api/client";
 import { taskEndpoints } from "./endpoints"
 import type { ApiTask } from "../utils/taskAdapter";
-import type { CreateTaskInput, UpdateTaskInput,CreateAgentAssignmentInput } from "../types/task";
+import type { CreateTaskInput, UpdateTaskInput,CreateAgentAssignmentInput,AgentAssignment } from "../types/task";
 
 export const getTasks = () => {
   return apiClient<ApiTask[]>(taskEndpoints.all);
@@ -36,4 +36,10 @@ export function createAgentAssignment(data: CreateAgentAssignmentInput) {
     method: "POST",
     body: data,
   });
+}
+
+export function getAgentAssignments(taskId: number) {
+  return apiClient<AgentAssignment[]>(
+    taskEndpoints.agentAssignmentsByTask(taskId)
+  );
 }

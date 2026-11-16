@@ -84,7 +84,6 @@ const handleAssignAgent = (data: {
       agent_id: data.agentId,
       title: data.title,
       description: data.description || null,
-      sequence: 1, // Ideiglenes
     },
     {
       onSuccess: () => {

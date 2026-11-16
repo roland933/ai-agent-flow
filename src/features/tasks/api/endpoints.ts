@@ -5,4 +5,5 @@ export const taskEndpoints = {
   run: (id: number) => `/tasks/${id}/run`,
   workflow: (id: number) => `/tasks/${id}/workflow`,
   agentAssignments: "/agent-assignments/",
+  agentAssignmentsByTask: (taskId: number) =>`/agent-assignments/task/${taskId}`,
 };

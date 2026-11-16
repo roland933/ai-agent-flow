@@ -27,6 +27,7 @@ export default function EditTaskDialog({
   const [description, setDescription] = useState("");
   const updateTaskMutation = useUpdateTask();
   useEffect(() => {
+    
     if (!task) return;
 
     setTitle(task.title);

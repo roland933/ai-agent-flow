@@ -17,6 +17,9 @@ import { TaskStatuses } from "../consts/taskConsts";
 import { useTasks } from "../hooks/useTasks";
 import AgentSelect from "@/components/common/ui/AgentSelect";
 import { AssignAgentDialog } from "../components/AssignAgentDialog";
+import { useState } from "react";
+import type { Task } from "../types/task";
+import { AgentAssignmentsDialog } from "../components/AgentAssignmentsDialog";
 
 
 export default function TasksPage() {
@@ -46,9 +49,22 @@ export default function TasksPage() {
     handleAssignAgent
   } = useTasks();
 
+  const [assignmentsDialogOpen, setAssignmentsDialogOpen] = useState(false);
+
+  const [selectedTaskForAssignments, setSelectedTaskForAssignments] =
+    useState<Task | null>(null);
+
+  const handleOpenAssignments = (task: Task) => {
+    setSelectedTaskForAssignments(task);
+    setAssignmentsDialogOpen(true);
+  };
+
+
+
   const columns = getTaskColumns({
     onDeleteTask: deleteTask,
-    onAssignAgent: handleAssginAgentDialog
+    onAssignAgent: handleAssginAgentDialog,
+    handleOpenAssignments: handleOpenAssignments
   });
 
 
@@ -57,6 +73,7 @@ export default function TasksPage() {
     setStatus("All" as (typeof TaskStatuses)[number]);
   };
 
+
   const statusOptions = TaskStatuses.map((item) => ({
     label: item === "All" ? "All statuses" : item,
     value: item,
@@ -64,11 +81,16 @@ export default function TasksPage() {
 
   return (
     <DashboardLayout>
-      <AssignAgentDialog open={assignAgentDialogOpen} 
-                         onOpenChange={setAssignDialogOpen}  
-                         task={selectedTaskForAssignment} 
-                         onSubmit={handleAssignAgent}
-                         />
+      <AgentAssignmentsDialog
+        open={assignmentsDialogOpen}
+        onOpenChange={setAssignmentsDialogOpen}
+        task={selectedTaskForAssignments}
+      />
+      <AssignAgentDialog open={assignAgentDialogOpen}
+        onOpenChange={setAssignDialogOpen}
+        task={selectedTaskForAssignment}
+        onSubmit={handleAssignAgent}
+      />
 
       <CreateTaskDialog
         open={createDialogOpen}
@@ -116,7 +138,7 @@ export default function TasksPage() {
           options={statusOptions}
         />
 
-        <AgentSelect  value={agent} onChange={setAgent}/>
+        <AgentSelect value={agent} onChange={setAgent} />
 
 
       </FilterBox>

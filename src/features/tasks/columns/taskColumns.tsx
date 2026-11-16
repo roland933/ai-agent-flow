@@ -1,21 +1,22 @@
 
 import { Trash2,UserPlus } from "lucide-react";
-import { useAgentStore } from "@/features/agents/store/agentStore";
+
 import type { DataTableColumn } from "@/features/ui/table/types/data-table";
 import type { Task } from "../types/task";
 import { TableActions } from "@/features/ui/table/TableActions";
 import StatusBadge from "@/features/ui/status/StatusBadge";
-
+import { AssignedAgentsCell } from "../components/AssignedAgentsCell";
 type TaskColumnActions = {
   onDeleteTask: (task: Task) => void;
   onAssignAgent:(task:Task) => void
+  handleOpenAssignments:(task:Task) => void
 };
 
 export function getTaskColumns({
   onDeleteTask,
   onAssignAgent,
+  handleOpenAssignments
 }: TaskColumnActions): DataTableColumn<Task>[] {
-  const agents = useAgentStore.getState().agents;
 
   return [
     {
@@ -30,19 +31,13 @@ export function getTaskColumns({
         </div>
       ),
     },
-    {
-      key: "agentId",
-      header: "Assigned Agent",
-      cell: (task) => {
-        const agent = agents.find((item) => item.id === task.agentId);
-
-        return (
-          <span className="text-slate-300">
-            {agent?.name ?? "Unassigned"}
-          </span>
-        );
-      },
-    },
+   {
+  key: "agentId",
+  header: "Assigned Agents",
+  cell: (task) => (
+    <AssignedAgentsCell task={task} handleOpenAssignments={handleOpenAssignments} />
+  ),
+},
     {
       key: "status",
       header: "Status",
