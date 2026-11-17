@@ -49,3 +49,12 @@ export function deleteAgentAssignment(id: number) {
     method: "DELETE",
   });
 }
+
+export function runTask(id: number) {
+  return apiClient<{ task_id: number; status: string; message: string }>(
+    taskEndpoints.run(id),
+    {
+      method: "POST",
+    }
+  );
+}

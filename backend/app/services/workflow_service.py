@@ -5,6 +5,7 @@ from app.services.task_service import task_service
 from app.enums.status import ExecutionStatus
 from app.db.session import SessionLocal
 from app.schemas.workflow import WorkflowExecutionResponse, AssignmentResultResponse
+from app.services.llm_service import llm_service
 
 class WorkflowService:
 
@@ -26,7 +27,8 @@ class WorkflowService:
             )
 
         return assignments
-    def execute_workflow(self,db:Session, task_id:int)->WorkflowExecutionResponse:
+    
+    async def execute_workflow(self,db:Session, task_id:int)->WorkflowExecutionResponse:
 
         task = task_service.get_by_id(db,task_id)
 
@@ -55,11 +57,19 @@ class WorkflowService:
                 db.commit()
                 db.refresh(assignment)
 
-            
+                result = await llm_service.execute_agent(
+                    agent_name=assignment.agent.name,
+                    agent_type=assignment.agent.agent_type.description,
+                    assignment_title=assignment.title,
+                    assignment_description=assignment.description,
+                    previous_output=previous_output,
+                )
+
                 assignment.output_data = {
-                    "result": f"{assignment.title} completed successfully.",
+                    "result": result,
                     "agent_id": assignment.agent_id,
                 }
+              
 
                 assignment.status = ExecutionStatus.COMPLETED
 
@@ -120,11 +130,11 @@ class WorkflowService:
             ],
         )
 
-    def execute_workflow_background(self, task_id: int):
+    async def execute_workflow_background(self, task_id: int):
         db = SessionLocal()
 
         try:
-            self.execute_workflow(db, task_id)
+            await self.execute_workflow(db, task_id)
         finally:
             db.close()
 
