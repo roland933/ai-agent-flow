@@ -1,5 +1,5 @@
 
-import { Trash2,UserPlus } from "lucide-react";
+import { Trash2, UserPlus, Play } from "lucide-react";
 
 import type { DataTableColumn } from "@/features/ui/table/types/data-table";
 import type { Task } from "../types/task";
@@ -8,17 +8,56 @@ import StatusBadge from "@/features/ui/status/StatusBadge";
 import { AssignedAgentsCell } from "../components/AssignedAgentsCell";
 type TaskColumnActions = {
   onDeleteTask: (task: Task) => void;
-  onAssignAgent:(task:Task) => void
-  handleOpenAssignments:(task:Task) => void
+  onAssignAgent: (task: Task) => void;
+  handleOpenAssignments: (task: Task) => void;
+  onRunTask: (task: Task) => void;
 };
 
 export function getTaskColumns({
   onDeleteTask,
   onAssignAgent,
-  handleOpenAssignments
+  handleOpenAssignments,
+  onRunTask
 }: TaskColumnActions): DataTableColumn<Task>[] {
 
   return [
+    {
+      key: "id",
+      header: "",
+      cell: (task) => (
+        <TableActions
+          actions={[
+            {
+              key: `Delete ${task.title}`,
+              label: `Delete `,
+              icon: <Trash2 size={16} />,
+              onClick: () => onDeleteTask(task),
+             
+
+            },
+            {
+              key: `Assign ${task.title}`,
+              label: `Assign`,
+              icon: <UserPlus size={16} />,
+              onClick: () => onAssignAgent(task),
+              visible: true,
+
+            },
+
+
+            {
+              key: `Run ${task.title}`,
+              label: "Run",
+              icon: <Play size={16} />,
+              onClick: () => onRunTask(task),
+             
+            },
+
+          ]}
+        />
+
+      ),
+    },
     {
       key: "title",
       header: "Task",
@@ -31,59 +70,24 @@ export function getTaskColumns({
         </div>
       ),
     },
-   {
-  key: "agentId",
-  header: "Assigned Agents",
-  cell: (task) => (
-    <AssignedAgentsCell task={task} handleOpenAssignments={handleOpenAssignments} />
-  ),
-},
+    {
+      key: "agentId",
+      header: "Assigned Agents",
+      cell: (task) => (
+        <AssignedAgentsCell task={task} handleOpenAssignments={handleOpenAssignments} />
+      ),
+    },
     {
       key: "status",
       header: "Status",
       cell: (task) => {
         return (
-           <StatusBadge status={task.status} />
-         
+          <StatusBadge status={task.status} />
+
         );
       },
     },
-    {
-      key: "createdAt",
-      header: "Created",
-      cell: (task) => (
-        <span className="whitespace-nowrap text-slate-300">
-          {new Date(task.createdAt).toLocaleDateString()}
-        </span>
-      ),
-    },
-    {
-      key: "id",
-      header: "",
-      cell: (task) => (
-        <TableActions
-          actions={[
-              {
-              key:  `Assign ${task.title}`,
-              label: `Assign`,
-              icon: <UserPlus size={16} />,
-              onClick: () => onAssignAgent(task),
-              visible: true,
 
-            },
-            {
-              key:  `Delete ${task.title}`,
-              label: `Delete `,
-              icon: <Trash2 size={16} />,
-              onClick: () => onDeleteTask(task),
-              visible: task.status !== "Completed",
 
-            },
-            
-          ]}
-        />
-
-      ),
-    },
   ];
 }

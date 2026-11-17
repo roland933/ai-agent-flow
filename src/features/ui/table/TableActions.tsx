@@ -19,7 +19,7 @@ type TableActionsProps = {
 
 export function TableActions({ actions }: TableActionsProps) {
   return (
-    <div className="flex items-center justify-end gap-1">
+    <div className="flex items-center justify-start gap-1">
       {actions
         .filter((action) => action.visible !== false)
         .map((action) => (

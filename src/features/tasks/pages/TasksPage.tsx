@@ -20,6 +20,7 @@ import { AssignAgentDialog } from "../components/AssignAgentDialog";
 import { useState } from "react";
 import type { Task } from "../types/task";
 import { AgentAssignmentsDialog } from "../components/AgentAssignmentsDialog";
+import { RunWorkflowDialog } from "../components/RunWorkflowDialog";
 
 
 export default function TasksPage() {
@@ -46,10 +47,15 @@ export default function TasksPage() {
     assignAgentDialogOpen,
     setAssignDialogOpen,
     selectedTaskForAssignment,
-    handleAssignAgent
+    handleAssignAgent,
+    handleRunTask,
+    handleRunConfirm,
+    runDialogOpen,
+    setRunDialogOpen,
+    runTaskMutation
   } = useTasks();
 
-  const [assignmentsDialogOpen, setAssignmentsDialogOpen] = useState(false);
+  const [assignmentsDialogOpen, setAssignmentsDialogOpen] = useState<boolean>(false);
 
   const [selectedTaskForAssignments, setSelectedTaskForAssignments] =
     useState<Task | null>(null);
@@ -60,11 +66,11 @@ export default function TasksPage() {
   };
 
 
-
   const columns = getTaskColumns({
     onDeleteTask: deleteTask,
     onAssignAgent: handleAssginAgentDialog,
-    handleOpenAssignments: handleOpenAssignments
+    handleOpenAssignments: handleOpenAssignments,
+    onRunTask: handleRunTask
   });
 
 
@@ -81,6 +87,14 @@ export default function TasksPage() {
 
   return (
     <DashboardLayout>
+      <RunWorkflowDialog 
+        open={runDialogOpen}
+        onOpenChange={setRunDialogOpen}
+        onContinue={handleRunConfirm}
+        task={task}
+        isPending={runTaskMutation.isPending}
+
+      />
       <AgentAssignmentsDialog
         open={assignmentsDialogOpen}
         onOpenChange={setAssignmentsDialogOpen}

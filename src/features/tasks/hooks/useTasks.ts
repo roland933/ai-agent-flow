@@ -5,6 +5,7 @@ import type { TaskStatuses } from "../consts/taskConsts";
 import { useExecutionStore } from "@/features/executions/store/executionStore";
 import { useDeleteTask } from "./useDeleteTask";
 import { useCreateAgentAssignment } from "./useCreateAgentAssignment";
+import { useRunTask } from "./useRunTask";
 export function useTasks() {
   const [task, setTask] = useState<Task | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState<boolean>(false);
@@ -17,8 +18,30 @@ export function useTasks() {
   const [status, setStatus] = useState<(typeof TaskStatuses)[number]>("All");
   const [agent, setAgent] = useState<string>("All")
   const tasks = useTaskStore((state) => state.tasks);
+  const [runDialogOpen, setRunDialogOpen] = useState(false);
+  const runTaskMutation = useRunTask();
+
+
   const deleteTaskMutation = useDeleteTask();
   const createAgentAssignmentMutation = useCreateAgentAssignment();
+
+  const handleRunTask = (task: Task) => {
+      setTask(task);
+      setRunDialogOpen(true);
+    };
+
+    const handleRunConfirm = () => {
+      if (!task) return;
+
+      runTaskMutation.mutate(task.id, {
+        onSuccess: () => {
+          setRunDialogOpen(false);
+          setTask(null);
+        },
+      });
+    };
+
+
 
   const executions = useExecutionStore((state) => state.executions);
 
@@ -71,28 +94,28 @@ export function useTasks() {
     setSelectedTaskForAssignment(task)
   }
 
-const handleAssignAgent = (data: {
-  agentId: number;
-  title: string;
-  description: string;
-}) => {
-  if (!selectedTaskForAssignment) return;
+  const handleAssignAgent = (data: {
+    agentId: number;
+    title: string;
+    description: string;
+  }) => {
+    if (!selectedTaskForAssignment) return;
 
-  createAgentAssignmentMutation.mutate(
-    {
-      task_id: selectedTaskForAssignment.id,
-      agent_id: data.agentId,
-      title: data.title,
-      description: data.description || null,
-    },
-    {
-      onSuccess: () => {
-        setAssignDialogOpen(false);
-        setSelectedTaskForAssignment(null);
+    createAgentAssignmentMutation.mutate(
+      {
+        task_id: selectedTaskForAssignment.id,
+        agent_id: data.agentId,
+        title: data.title,
+        description: data.description || null,
       },
-    },
-  );
-};
+      {
+        onSuccess: () => {
+          setAssignDialogOpen(false);
+          setSelectedTaskForAssignment(null);
+        },
+      },
+    );
+  };
   const handleEditDialogChange = (open: boolean) => {
     setEditDialogOpen(open);
 
@@ -151,7 +174,12 @@ const handleAssignAgent = (data: {
     assignAgentDialogOpen,
     setAssignDialogOpen,
     selectedTaskForAssignment,
-    handleAssignAgent
+    handleAssignAgent,
+    handleRunTask,
+    handleRunConfirm,
+    runDialogOpen,
+    setRunDialogOpen,
+    runTaskMutation
 
   };
 }
