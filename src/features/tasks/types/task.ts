@@ -43,6 +43,20 @@ export interface AgentAssignment {
   description: string | null;
   status: AgentAssignmentStatus;
   sequence: number;
+  output_data:object
 }
+
+
+export type WorkflowExecution = {
+  task_id: number;
+  status: string;
+  message: string;
+  results: {
+    assignment_id: number;
+    agent_id: number;
+    status: string;
+    output: Record<string, unknown> | null;
+  }[];
+};
 
 

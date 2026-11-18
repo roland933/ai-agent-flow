@@ -54,7 +54,7 @@ def run_task(
         "message": "Workflow execution started.",
     }
 
-@router.get("/task_id/workflow",response_model=WorkflowExecutionResponse)
+@router.get("/{task_id}/workflow",response_model=WorkflowExecutionResponse)
 def get_workflow_status(task_id:int,db:Session=Depends(get_db)):
     return workflow_service.get_workflow_status(db,task_id)
 

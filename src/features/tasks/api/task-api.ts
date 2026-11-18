@@ -1,7 +1,7 @@
 import { apiClient } from "@/api/client";
 import { taskEndpoints } from "./endpoints"
 import type { ApiTask } from "../utils/taskAdapter";
-import type { CreateTaskInput, UpdateTaskInput,CreateAgentAssignmentInput,AgentAssignment } from "../types/task";
+import type { CreateTaskInput, UpdateTaskInput,CreateAgentAssignmentInput,AgentAssignment, WorkflowExecution } from "../types/task";
 
 export const getTasks = () => {
   return apiClient<ApiTask[]>(taskEndpoints.all);
@@ -58,3 +58,6 @@ export function runTask(id: number) {
     }
   );
 }
+
+export const getWorkflowStatus = (taskId: number) =>
+  apiClient<WorkflowExecution>(taskEndpoints.workflow(taskId));

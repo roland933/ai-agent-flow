@@ -7,6 +7,9 @@ import type { Task } from "../types/task";
 import { Button } from "@/features/ui/button/Button";
 import { Trash2 } from "lucide-react";
 import { useDeleteAgentAssignment } from "../hooks/useDeleteAgentAssignment";
+import { useWorkflowStatus } from "../hooks/useWorkflowStatus";
+import { useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
 
 type AgentAssignmentsDialogProps = {
   open: boolean;
@@ -19,14 +22,21 @@ export function AgentAssignmentsDialog({
   onOpenChange,
   task,
 }: AgentAssignmentsDialogProps) {
+
   const {
     data: assignments,
     isLoading,
     isError,
   } = useAgentAssignmentsQuery(task?.id ?? null);
 
+  const { data: workflowStatus } = useWorkflowStatus(
+      task?.id ?? 0,
+      open && task !== null,
+    );
+
   const agents = useAgentStore((state) => state.agents);
   const deleteAssignment = useDeleteAgentAssignment()
+  const queryClient = useQueryClient();
 
   const handleDeleteAssignment = (id: number) => {
     deleteAssignment.mutate({
@@ -34,6 +44,14 @@ export function AgentAssignmentsDialog({
       taskId: task!.id,
     });
   };
+
+  useEffect(() => {
+    if (workflowStatus) {
+      queryClient.invalidateQueries({
+        queryKey: ["agent-assignments", task?.id],
+      });
+    }
+  }, [workflowStatus, task?.id, queryClient]);
 
   return (
     <Dialog
@@ -62,6 +80,7 @@ export function AgentAssignmentsDialog({
                 <th className="px-3 py-3">Agent</th>
                 <th className="px-3 py-3">Assignment</th>
                 <th className="px-3 py-3">Status</th>
+                <th className="px-3 py-3">Output</th>
               </tr>
             </thead>
 
@@ -102,6 +121,17 @@ export function AgentAssignmentsDialog({
                       )}
                      
                     </td>
+                    <td className="px-3 py-3 text-slate-300">
+                      {assignment.output_data?.result ? (
+                        <p className="max-w-xs whitespace-pre-wrap text-xs">
+                          {assignment.output_data.result}
+                        </p>
+                      ) : (
+                        <span className="text-xs text-slate-500">
+                          No output yet
+                        </span>
+                      )}
+                    </td>
                   </tr>
                 );
               })}
@@ -109,7 +139,7 @@ export function AgentAssignmentsDialog({
               {!assignments?.length && (
                 <tr>
                   <td
-                    colSpan={4}
+                    colSpan={5}
                     className="py-8 text-center text-slate-500"
                   >
                     No agents assigned.

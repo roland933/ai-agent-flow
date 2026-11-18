@@ -52,7 +52,9 @@ export default function TasksPage() {
     handleRunConfirm,
     runDialogOpen,
     setRunDialogOpen,
-    runTaskMutation
+    runTaskMutation,
+    workflowStatus,
+    isWorkflowStatusLoading,
   } = useTasks();
 
   const [assignmentsDialogOpen, setAssignmentsDialogOpen] = useState<boolean>(false);
@@ -87,7 +89,7 @@ export default function TasksPage() {
 
   return (
     <DashboardLayout>
-      <RunWorkflowDialog 
+      <RunWorkflowDialog
         open={runDialogOpen}
         onOpenChange={setRunDialogOpen}
         onContinue={handleRunConfirm}
