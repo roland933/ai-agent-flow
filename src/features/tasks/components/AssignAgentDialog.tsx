@@ -5,18 +5,26 @@ import { Dialog } from "@/features/ui/dialog/Dialog";
 import { Button } from "@/features/ui/button/Button";
 import AgentSelector from "@/features/agents/components/AgentSelector";
 import { useAgentStore } from "@/features/agents/store/agentStore";
-
+import AssignmentForm from "./AssignmentForm";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
 import type { Task } from "../types/task";
 
 type AssignAgentDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   task: Task | null;
-  onSubmit: (data: {
-    agentIds: number[];
+ onSubmit: (data: {
+  assignments: {
+    agentId: number;
     title: string;
     description: string;
-  }) => void;
+  }[];
+}) => void;
 };
 
 export function AssignAgentDialog({
@@ -28,16 +36,70 @@ export function AssignAgentDialog({
   const agents = useAgentStore((state) => state.agents);
 
   const [selectedAgents, setSelectedAgents] = useState<number[]>([]);
+  const [activeAgentId, setActiveAgentId] = useState<number | null>(null);
+
+  const [assignmentForms, setAssignmentForms] = useState<
+    Record<number, { title: string; description: string }>
+  >({});
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
 
-  const handleSubmit = () => {
-    if (selectedAgents.length === 0 || !title.trim()) return;
+const handleSubmit = () => {
+  const assignments = selectedAgents.map((agentId) => ({
+    agentId,
+    title: assignmentForms[agentId]?.title.trim() ?? "",
+    description: assignmentForms[agentId]?.description.trim() ?? "",
+  }));
 
-    onSubmit({
-      agentIds: selectedAgents,
-      title: title.trim(),
-      description: description.trim(),
+  if (
+    assignments.length === 0 ||
+    assignments.some((assignment) => !assignment.title)
+  ) {
+    return;
+  }
+
+  onSubmit({ assignments });
+};
+
+
+  const updateAssignmentForm = (
+    agentId: number,
+    field: "title" | "description",
+    value: string,
+  ) => {
+    setAssignmentForms((prev) => ({
+      ...prev,
+      [agentId]: {
+        ...prev[agentId],
+        [field]: value,
+      },
+    }));
+  };
+
+  const handleSelectedAgentsChange = (agentIds: number[]) => {
+    setSelectedAgents(agentIds);
+
+    setAssignmentForms((prev) => {
+      const updatedForms: typeof prev = {};
+
+      agentIds.forEach((id) => {
+        updatedForms[id] = prev[id] ?? {
+          title: "",
+          description: "",
+        };
+      });
+
+      return updatedForms;
+    });
+
+
+
+    setActiveAgentId((current) => {
+      if (current !== null && agentIds.includes(current)) {
+        return current;
+      }
+
+      return agentIds[0] ?? null;
     });
   };
 
@@ -58,7 +120,12 @@ export function AssignAgentDialog({
           <Button
             title={`Assign ${selectedAgents.length} agents`}
             onClick={handleSubmit}
-            disabled={selectedAgents.length === 0 || !title.trim()}
+           disabled={
+  selectedAgents.length === 0 ||
+  selectedAgents.some(
+    (agentId) => !assignmentForms[agentId]?.title.trim()
+  )
+}
           />
         </>
       }
@@ -83,34 +150,41 @@ export function AssignAgentDialog({
           <AgentSelector
             agents={agents}
             selectedAgents={selectedAgents}
-            onChange={setSelectedAgents}
+            onChange={handleSelectedAgentsChange}
           />
         </div>
+        <Tabs
+          value={String(activeAgentId ?? "")}
+          onValueChange={(value) => setActiveAgentId(Number(value))}
+          className="w-full"
+        >
+          <TabsList>
+            {selectedAgents.map((agentId) => {
+              const agent = agents.find((item) => item.id === agentId);
 
-        <div className="space-y-1.5">
-          <label className="text-sm font-medium text-slate-200">
-            Assignment title
-          </label>
-          <input
-            value={title}
-            onChange={(event) => setTitle(event.target.value)}
-            placeholder="e.g. Research the topic"
-            className="w-full rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-white outline-none focus:border-purple-500"
-          />
-        </div>
+              return (
+                <TabsTrigger key={agentId} value={String(agentId)}>
+                  {agent?.name ?? `Agent #${agentId}`}
+                </TabsTrigger>
+              );
+            })}
+          </TabsList>
 
-        <div className="space-y-1.5">
-          <label className="text-sm font-medium text-slate-200">
-            Description
-          </label>
-          <textarea
-            value={description}
-            onChange={(event) => setDescription(event.target.value)}
-            placeholder="Describe what the agents should do..."
-            rows={4}
-            className="w-full resize-none rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-white outline-none focus:border-purple-500"
-          />
-        </div>
+          {selectedAgents.map((agentId) => (
+            <TabsContent key={agentId} value={String(agentId)}>
+              <AssignmentForm
+                title={assignmentForms[agentId]?.title ?? ""}
+                description={assignmentForms[agentId]?.description ?? ""}
+                onTitleChange={(value) =>
+                  updateAssignmentForm(agentId, "title", value)
+                }
+                onDescriptionChange={(value) =>
+                  updateAssignmentForm(agentId, "description", value)
+                }
+              />
+            </TabsContent>
+          ))}
+        </Tabs>
       </div>
     </Dialog>
   );

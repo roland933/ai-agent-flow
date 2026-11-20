@@ -13,10 +13,11 @@ export function useDeleteAgentAssignment() {
     mutationFn: ({ id }: DeleteAgentAssignmentInput) =>
       deleteAgentAssignment(id),
 
-    onSuccess: (_, assignmentData) => {
-      queryClient.invalidateQueries({
-        queryKey: ["agent-assignments", assignmentData.taskId],
+    onSuccess: (_) => {
+     queryClient.invalidateQueries({
+        queryKey: ["agent-assignments"],
       });
+
     },
 
     onError: (error) => {

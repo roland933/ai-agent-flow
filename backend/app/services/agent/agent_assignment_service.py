@@ -13,6 +13,9 @@ class AgentAssignmentService(
 ):
     model = AgentAssignment
 
+    def get_all(self, db: Session):
+        return db.query(self.model).order_by(self.model.task_id, self.model.sequence).all()
+
     def create(
         self,
         db: Session,

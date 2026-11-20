@@ -51,6 +51,7 @@ export function deleteAgentAssignment(id: number) {
 }
 
 export function runTask(id: number) {
+ 
   return apiClient<{ task_id: number; status: string; message: string }>(
     taskEndpoints.run(id),
     {
@@ -60,4 +61,8 @@ export function runTask(id: number) {
 }
 
 export const getWorkflowStatus = (taskId: number) =>
+
   apiClient<WorkflowExecution>(taskEndpoints.workflow(taskId));
+
+export const getAllAgentAssignments = () =>
+  apiClient<AgentAssignment[]>("/agent-assignments/");

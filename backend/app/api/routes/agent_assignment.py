@@ -38,3 +38,13 @@ def delete_assignment(
     db: Session = Depends(get_db),
 ):
     agent_assignment_service.delete(db, assignment_id)
+
+
+@router.get(
+    "/",
+    response_model=list[AgentAssignmentResponse],
+)
+def get_all_assignments_endpoint(
+    db: Session = Depends(get_db),
+):
+    return agent_assignment_service.get_all(db)

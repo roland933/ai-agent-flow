@@ -10,9 +10,10 @@ export function useCreateAgentAssignment() {
     mutationFn: (data: CreateAgentAssignmentInput) => createAgentAssignment(data),
 
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({
-        queryKey: ["agent-assignments", variables.task_id],
+       queryClient.invalidateQueries({
+        queryKey: ["agent-assignments"],
       });
+    
     },
 
     onError: (error) => {

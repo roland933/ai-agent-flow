@@ -21,6 +21,7 @@ import { useState } from "react";
 import type { Task } from "../types/task";
 import { AgentAssignmentsDialog } from "../components/AgentAssignmentsDialog";
 import { RunWorkflowDialog } from "../components/RunWorkflowDialog";
+import { useAllAgentAssignmentsQuery } from "../hooks/useAgentAssignmentsQuery";
 
 
 export default function TasksPage() {
@@ -67,12 +68,18 @@ export default function TasksPage() {
     setAssignmentsDialogOpen(true);
   };
 
+  const {
+  data: assignments = [],
+  isLoading: isAssignmentsLoading,
+} = useAllAgentAssignmentsQuery();
+
 
   const columns = getTaskColumns({
     onDeleteTask: deleteTask,
     onAssignAgent: handleAssginAgentDialog,
     handleOpenAssignments: handleOpenAssignments,
-    onRunTask: handleRunTask
+    onRunTask: handleRunTask,
+     hasAssignments: (task) => assignments.some((assignment) => assignment.task_id === task.id),
   });
 
 
@@ -95,6 +102,7 @@ export default function TasksPage() {
         onContinue={handleRunConfirm}
         task={task}
         isPending={runTaskMutation.isPending}
+        error={runTaskMutation.error?.message ?? null}
 
       />
       <AgentAssignmentsDialog

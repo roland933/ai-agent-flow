@@ -8,6 +8,7 @@ type RunWorkflowDialogProps = {
   onContinue: () => void;
   task: Task | null;
   isPending: boolean;
+  error: string | null;
 };
 
 export function RunWorkflowDialog({
@@ -16,6 +17,7 @@ export function RunWorkflowDialog({
   onContinue,
   task,
   isPending,
+  error,
 }: RunWorkflowDialogProps) {
   return (
     <Dialog
@@ -42,13 +44,21 @@ export function RunWorkflowDialog({
         </>
       }
     >
-      <p className="text-sm leading-relaxed text-slate-400">
-        Are you sure you want to start the workflow for{" "}
-        <span className="font-medium text-slate-200">
-          {task?.title ?? ""}
-        </span>
-        ?
-      </p>
+      <div className="space-y-3">
+        <p className="text-sm leading-relaxed text-slate-400">
+          Are you sure you want to start the workflow for{" "}
+          <span className="font-medium text-slate-200">
+            {task?.title ?? ""}
+          </span>
+          ?
+        </p>
+
+        {error && (
+          <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-400">
+            {error}
+          </div>
+        )}
+      </div>
     </Dialog>
   );
 }

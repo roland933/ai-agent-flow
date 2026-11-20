@@ -11,13 +11,15 @@ type TaskColumnActions = {
   onAssignAgent: (task: Task) => void;
   handleOpenAssignments: (task: Task) => void;
   onRunTask: (task: Task) => void;
+  hasAssignments: (task: Task) => boolean;
 };
 
 export function getTaskColumns({
   onDeleteTask,
   onAssignAgent,
   handleOpenAssignments,
-  onRunTask
+  onRunTask,
+  hasAssignments
 }: TaskColumnActions): DataTableColumn<Task>[] {
 
   return [
@@ -50,6 +52,7 @@ export function getTaskColumns({
               label: "Run",
               icon: <Play size={16} />,
               onClick: () => onRunTask(task),
+              disabled: !hasAssignments(task),
              
             },
 

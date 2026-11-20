@@ -15,8 +15,7 @@ export function useTasks() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState<boolean>(false);
   const [createDialogOpen, setCreateDialogOpen] = useState<boolean>(false);
   const [assignAgentDialogOpen, setAssignDialogOpen] = useState<boolean>(false)
-  const [selectedTaskForAssignment, setSelectedTaskForAssignment] =
-    useState<Task | null>(null);
+  const [selectedTaskForAssignment, setSelectedTaskForAssignment] = useState<Task | null>(null);
   const [search, setSearch] = useState<string>("");
   const [status, setStatus] = useState<(typeof TaskStatuses)[number]>("All");
   const [agent, setAgent] = useState<string>("All")
@@ -31,7 +30,7 @@ export function useTasks() {
   const createAgentAssignmentMutation = useCreateAgentAssignment();
 
   const workflowStatusQuery = useWorkflowStatus(
-    task?.id ?? 0,
+    task?.id ?? null,
     runTaskMutation.isSuccess
   );
 
@@ -49,16 +48,17 @@ export function useTasks() {
     setRunDialogOpen(true);
   };
 
-
-  const handleRunConfirm = () => {
+  const handleRunConfirm = async () => {
     if (!task) return;
 
-    runTaskMutation.mutate(task.id, {
-      onSuccess: () => {
-        setRunDialogOpen(false);
-        setTask(null);
-      },
-    });
+    try {
+      await runTaskMutation.mutateAsync(task.id);
+
+      setRunDialogOpen(false);
+      setTask(null);
+    } catch (error) {
+      console.error("Failed to start workflow:", error);
+    }
   };
 
 
@@ -90,20 +90,24 @@ export function useTasks() {
     setAssignDialogOpen(true);
     setSelectedTaskForAssignment(task)
   }
+
+
   const handleAssignAgent = async (data: {
-    agentIds: number[];
-    title: string;
-    description: string;
+    assignments: {
+      agentId: number;
+      title: string;
+      description: string;
+    }[];
   }) => {
     if (!selectedTaskForAssignment) return;
 
     try {
-      for (const agentId of data.agentIds) {
+      for (const assignment of data.assignments) {
         await createAgentAssignmentMutation.mutateAsync({
           task_id: selectedTaskForAssignment.id,
-          agent_id: agentId,
-          title: data.title,
-          description: data.description || null,
+          agent_id: assignment.agentId,
+          title: assignment.title,
+          description: assignment.description || null,
         });
       }
 
@@ -113,6 +117,7 @@ export function useTasks() {
       console.error("Failed to assign agents:", error);
     }
   };
+
   const handleEditDialogChange = (open: boolean) => {
     setEditDialogOpen(open);
 

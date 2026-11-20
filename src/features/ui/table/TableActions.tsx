@@ -9,6 +9,7 @@ type TableAction = {
   icon?: ReactNode;
   onClick: () => void;
   visible?: boolean;
+  disabled?:boolean;
   variant?: "ghost" | "destructive";
   className?:string
 };
@@ -27,6 +28,7 @@ export function TableActions({ actions }: TableActionsProps) {
             className={`hover:cursor-pointer ${action.className}`}
             key={action.key}
             type="button"
+            disabled={action.disabled}
             variant={action.variant ?? "ghost"}
             size="icon"
             aria-label={action.label}
