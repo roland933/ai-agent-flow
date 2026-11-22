@@ -22,9 +22,10 @@ import type { Task } from "../types/task";
 import { AgentAssignmentsDialog } from "../components/AgentAssignmentsDialog";
 import { RunWorkflowDialog } from "../components/RunWorkflowDialog";
 import { useAllAgentAssignmentsQuery } from "../hooks/useAgentAssignmentsQuery";
-
+import { useTasksQuery } from "@/features/tasks/hooks/useTasksQuery";
 
 export default function TasksPage() {
+  const { isLoading, isError, error } = useTasksQuery();
   const {
     task,
     selectedTask,
