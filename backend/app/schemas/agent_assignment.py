@@ -17,6 +17,9 @@ class AgentAssignmentResponse(BaseModel):
     description: str | None
     status: str
     sequence: int
+    input_data: dict | None = None
+    output_data: dict | None = None
+
 
     model_config = {"from_attributes": True}
 
