@@ -10,7 +10,7 @@ import {
   ClipboardList,
   Copy,
   GitBranch,
-  Layers3,
+
   Lock,
   Pencil,
   Play,
@@ -20,9 +20,10 @@ import {
 } from "lucide-react";
 
 import DashboardLayout from "@/components/layout/DashboardLayout";
-import { HeaderLayout } from "@/components/layout/HeaderLayout";
-import AgentSelect from "@/features/agents/components/AgentSelect";
 import { useAgentStore } from "@/features/agents/store/agentStore";
+import { AgentAssignmentDialog } from "@/features/workflows/components/AgentAssignmentDialog";
+import { WorkflowTaskDialog } from "@/features/workflows/components/WorkflowTaskDialog";
+
 type AgentStatus = "idle" | "pending" | "running" | "completed" | "failed";
 type TaskStatus = "draft" | "running" | "completed" | "failed";
 
@@ -39,6 +40,7 @@ type Workflow = {
   name: string;
   description: string;
   taskTitle: string;
+  taskDescription: string;
   taskStatus: TaskStatus;
   assignments: WorkflowAssignment[];
 };
@@ -120,6 +122,8 @@ export default function Overview() {
 
   const [selectedAgentId, setSelectedAgentId] = useState<number | null>(null);
   const [assignmentInstructions, setAssignmentInstructions] = useState("");
+  const [taskDialogOpen, setTaskDialogOpen] = useState(false);
+  const [editingTaskWorkflowId, setEditingTaskWorkflowId] = useState<number | null>(null);
 
   const [instructionTarget, setInstructionTarget] = useState<{
     workflowId: number;
@@ -135,6 +139,28 @@ export default function Overview() {
     (currentPage - 1) * PAGE_SIZE,
     currentPage * PAGE_SIZE,
   );
+
+  const handleSaveWorkflowTask = (data: {
+  title: string;
+  description: string;
+}) => {
+  if (editingTaskWorkflowId === null) return;
+
+  setWorkflows((prev) =>
+    prev.map((workflow) =>
+      workflow.id === editingTaskWorkflowId
+        ? {
+            ...workflow,
+            taskTitle: data.title,
+            taskDescription: data.description,
+          }
+        : workflow
+    )
+  );
+
+  setTaskDialogOpen(false);
+  setEditingTaskWorkflowId(null);
+};
 
   const openAddAssignmentModal = (workflowId: number) => {
     setEditingAssignment({
@@ -161,71 +187,62 @@ export default function Overview() {
     setAssignmentModalOpen(true);
   };
 
-  const handleSaveAssignment = () => {
-    if (!editingAssignment || selectedAgentId === null) return;
+const handleSaveAssignment = (data: {
+  agentId: number;
+  instructions: string;
+}) => {
+  if (!editingAssignment) return;
 
-    const workflow = workflows.find(
-      (item) => item.id === editingAssignment.workflowId
-    );
+  const selectedAgent = agents.find(
+    (agent) => agent.id === data.agentId
+  );
 
-    if (!workflow) return;
+  if (!selectedAgent) return;
 
-    const selectedAgent = agents.find(
-      (agent) => agent.id === selectedAgentId
-    );
+  setWorkflows((prev) =>
+    prev.map((workflow) => {
+      if (workflow.id !== editingAssignment.workflowId) {
+        return workflow;
+      }
 
-    if (!selectedAgent) return;
-
-    // Ne lehessen ugyanazt az agentet kétszer hozzáadni.
-    const alreadyAssigned = workflow.assignments.some(
-      (assignment) =>
-        assignment.agentId === selectedAgentId &&
-        assignment.id !== editingAssignment.assignmentId
-    );
-
-    if (alreadyAssigned) return;
-
-    setWorkflows((prev) =>
-      prev.map((item) => {
-        if (item.id !== editingAssignment.workflowId) return item;
-
-        if (editingAssignment.assignmentId === null) {
-          if (item.assignments.length >= MAX_AGENTS) return item;
-
-          return {
-            ...item,
-            assignments: [
-              ...item.assignments,
-              {
-                id: Date.now(),
-                agentId: selectedAgent.id,
-                agentName: selectedAgent.name,
-                instructions: assignmentInstructions,
-                status: "idle" as AgentStatus,
-              },
-            ],
-          };
+      if (editingAssignment.assignmentId === null) {
+        if (workflow.assignments.length >= MAX_AGENTS) {
+          return workflow;
         }
 
         return {
-          ...item,
-          assignments: item.assignments.map((assignment) =>
-            assignment.id === editingAssignment.assignmentId
-              ? {
+          ...workflow,
+          assignments: [
+            ...workflow.assignments,
+            {
+              id: Date.now(),
+              agentId: selectedAgent.id,
+              agentName: selectedAgent.name,
+              instructions: data.instructions,
+              status: "idle" as AgentStatus,
+            },
+          ],
+        };
+      }
+
+      return {
+        ...workflow,
+        assignments: workflow.assignments.map((assignment) =>
+          assignment.id === editingAssignment.assignmentId
+            ? {
                 ...assignment,
                 agentId: selectedAgent.id,
                 agentName: selectedAgent.name,
-                instructions: assignmentInstructions,
+                instructions: data.instructions,
               }
-              : assignment
-          ),
-        };
-      })
-    );
+            : assignment
+        ),
+      };
+    })
+  );
 
-    setAssignmentModalOpen(false);
-    setEditingAssignment(null);
-  };
+  setEditingAssignment(null);
+};
 
   const toggleExpanded = (id: number) => {
     setExpandedIds((current) =>
@@ -404,55 +421,13 @@ export default function Overview() {
 
   return (
     <DashboardLayout>
-      <HeaderLayout
-        title="Overview"
-        icon={<Layers3 />}
-        subTitle="Create, manage and reuse your AI workflows."
-      />
-
-      <section className="mt-8">
-        <div className="mb-5">
-          <h2 className="text-lg font-semibold text-[#F1F2F7]">
-            How AgentFlow works
-          </h2>
-          <p className="mt-1 text-sm text-[#9299AA]">
-            Build reusable workflows with your AI agents.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
-          {[
-            { number: "01", title: "Create workflow", description: "Start with a new workflow template.", icon: GitBranch },
-            { number: "02", title: "Create task", description: "Define the common task description.", icon: ClipboardList },
-            { number: "03", title: "Choose agents", description: "Select up to three AI agents.", icon: Bot },
-            { number: "04", title: "Add instructions", description: "Give each agent its own instructions.", icon: Pencil },
-            { number: "05", title: "Run workflow", description: "Execute your agents sequentially.", icon: Play },
-          ].map((step) => {
-            const Icon = step.icon;
-
-            return (
-              <div key={step.number} className="flex gap-3">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#8B7CF6]/20 bg-[#8B7CF6]/10 text-xs font-semibold text-[#A99FFF]">
-                  {step.number}
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <Icon size={15} className="text-[#A99FFF]" />
-                    <h3 className="text-sm font-medium text-[#F1F2F7]">{step.title}</h3>
-                  </div>
-                  <p className="mt-1 text-xs leading-relaxed text-[#9299AA]">{step.description}</p>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </section>
-
+  
+    
       <section className="mt-12">
         <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h2 className="text-lg font-semibold text-[#F1F2F7]">My workflows</h2>
-            <p className="mt-1 text-sm text-[#9299AA]">
+            <h2 className="text-2xl font-semibold text-[#F1F2F7] uppercase">My workflows</h2>
+            <p className="mt-1 text-md text-[#9299AA]">
               Manage and reuse your workflow templates.
             </p>
           </div>
@@ -539,7 +514,20 @@ export default function Overview() {
                           <ClipboardList size={14} />
                           Shared task
                         </div>
-                        <StatusBadge status={workflow.taskStatus} />
+                       
+                      {/*  <StatusBadge status={workflow.taskStatus} /> */}
+                         <button
+                          type="button"
+                          disabled={isRunning}
+                          onClick={() => {
+                            setEditingTaskWorkflowId(workflow.id);
+                            setTaskDialogOpen(true);
+                          }}
+                          className="hover:cursor-pointer rounded-lg p-2 text-slate-400 transition hover:bg-white/5 hover:text-purple-400 disabled:cursor-not-allowed disabled:opacity-40"
+                          title="Edit task"
+                        >
+                          <Pencil size={16} />
+                        </button>
                       </div>
                       <p className="text-sm font-medium text-[#F1F2F7]">{workflow.taskTitle}</p>
                     </div>
@@ -577,7 +565,7 @@ export default function Overview() {
 
                             <div className="mt-4 flex items-center justify-between border-t border-white/10 pt-3">
                               <button
-                                onClick={() => openInstructions(workflow, assignment)}
+                                onClick={() => openEditAssignmentModal(workflow.id, assignment)}
                                 disabled={isRunning}
                                 title={assignment.instructions ? "Edit instructions" : "Add instructions"}
                                 className="rounded-lg p-2 text-current transition-colors hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-30"
@@ -622,6 +610,61 @@ export default function Overview() {
                       )}
                     </div>
 
+                    {editingTaskWorkflowId !== null && (
+                        <WorkflowTaskDialog
+                          open={taskDialogOpen}
+                          onOpenChange={(open) => {
+                            setTaskDialogOpen(open);
+
+                            if (!open) {
+                              setEditingTaskWorkflowId(null);
+                            }
+                          }}
+                          initialTitle={
+                            workflows.find((w) => w.id === editingTaskWorkflowId)?.taskTitle ?? ""
+                          }
+                          initialDescription={
+                            workflows.find((w) => w.id === editingTaskWorkflowId)?.taskDescription ?? ""
+                          }
+                          onSubmit={handleSaveWorkflowTask}
+                        />
+                      )}
+
+                    <AgentAssignmentDialog
+                            open={
+                              assignmentModalOpen &&
+                              editingAssignment?.workflowId === workflow.id
+                            }
+                            onOpenChange={(open) => {
+                              setAssignmentModalOpen(open);
+
+                              if (!open) {
+                                setEditingAssignment(null);
+                              }
+                            }}
+                            initialAgentId={
+                              workflow.assignments.find(
+                                (assignment) =>
+                                  assignment.id === editingAssignment?.assignmentId
+                              )?.agentId ?? null
+                            }
+                            initialInstructions={
+                              workflow.assignments.find(
+                                (assignment) =>
+                                  assignment.id === editingAssignment?.assignmentId
+                              )?.instructions ?? ""
+                            }
+                            excludedAgentIds={workflow.assignments
+                              .filter(
+                                (assignment) =>
+                                  assignment.id !== editingAssignment?.assignmentId
+                              )
+                              .map((assignment) => assignment.agentId)}
+                            onSubmit={handleSaveAssignment}
+                          />
+
+                    
+
                     {isRunning && (
                       <div className="mt-3 flex items-center gap-2 text-xs text-blue-300">
                         <Lock size={13} />
@@ -637,11 +680,13 @@ export default function Overview() {
           {workflows.length === 0 && (
             <div className="rounded-2xl border border-dashed border-[#303444] py-12 text-center">
               <GitBranch className="mx-auto mb-3 text-[#777D8B]" size={28} />
-              <p className="text-sm font-medium text-[#F1F2F7]">No workflows yet</p>
-              <p className="mt-1 text-xs text-[#9299AA]">Create your first workflow to get started.</p>
+              <p className="text-xl font-medium text-[#F1F2F7]">No workflows yet</p>
+              <p className="mt-1 text-md text-[#9299AA]">Create your first workflow to get started.</p>
             </div>
           )}
         </div>
+
+        
 
         {totalPages > 1 && (
           <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
@@ -683,51 +728,6 @@ export default function Overview() {
         )}
       </section>
 
-      {instructionTarget && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-xl rounded-2xl border border-[#303444] bg-[#151923] shadow-2xl">
-            <div className="flex items-center justify-between border-b border-[#303444] p-5">
-              <div>
-                <h3 className="font-semibold text-[#F1F2F7]">Agent instructions</h3>
-                <p className="mt-1 text-xs text-[#9299AA]">
-                  Define what this agent should do.
-                </p>
-              </div>
-              <button
-                onClick={() => setInstructionTarget(null)}
-                className="rounded-lg p-2 text-[#9299AA] hover:bg-[#252B38]"
-              >
-                <X size={18} />
-              </button>
-            </div>
-
-            <div className="p-5">
-              <textarea
-                value={instructionText}
-                onChange={(event) => setInstructionText(event.target.value)}
-                rows={7}
-                placeholder="Write instructions for this agent..."
-                className="w-full resize-y rounded-xl border border-[#303444] bg-[#0B0D12] p-4 text-sm text-[#F1F2F7] outline-none placeholder:text-[#6F7686] focus:border-[#8B7CF6]"
-              />
-            </div>
-
-            <div className="flex justify-end gap-3 border-t border-[#303444] p-5">
-              <button
-                onClick={() => setInstructionTarget(null)}
-                className="rounded-lg border border-[#303444] px-4 py-2 text-sm text-[#9299AA] hover:bg-[#252B38]"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={saveInstructions}
-                className="rounded-lg bg-[#8B7CF6] px-4 py-2 text-sm font-medium text-white hover:bg-[#7969E8]"
-              >
-                Save instructions
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </DashboardLayout>
   );
 }
