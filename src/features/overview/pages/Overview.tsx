@@ -23,6 +23,16 @@ import DashboardLayout from "@/components/layout/DashboardLayout";
 import { useAgentStore } from "@/features/agents/store/agentStore";
 import { AgentAssignmentDialog } from "@/features/workflows/components/AgentAssignmentDialog";
 import { WorkflowTaskDialog } from "@/features/workflows/components/WorkflowTaskDialog";
+import {
+  CreateWorkflowDialog,
+  type CreateWorkflowData,
+} from "@/features/workflows/components/CreateWorkflowDialog";
+
+import {
+  EditWorkflowDialog,
+} from "@/features/workflows/components/EditWorkflowDialog";
+
+
 
 type AgentStatus = "idle" | "pending" | "running" | "completed" | "failed";
 type TaskStatus = "draft" | "running" | "completed" | "failed";
@@ -34,6 +44,7 @@ type WorkflowAssignment = {
   instructions: string;
   status: AgentStatus;
 };
+type OutputFormat = "markdown" | "json" | "text";
 
 type Workflow = {
   id: number;
@@ -43,10 +54,15 @@ type Workflow = {
   taskDescription: string;
   taskStatus: TaskStatus;
   assignments: WorkflowAssignment[];
+  outputName: string;
+  outputDescription: string;
+  outputFormat: OutputFormat;
 };
 
 const PAGE_SIZE = 5;
 const MAX_AGENTS = 3;
+
+
 
 const initialWorkflows: Workflow[] = [
   {
@@ -115,13 +131,38 @@ export default function Overview() {
   const [expandedIds, setExpandedIds] = useState<number[]>([1]);
   const [currentPage, setCurrentPage] = useState(1);
   const [assignmentModalOpen, setAssignmentModalOpen] = useState(false);
+  const [selectedAgentId, setSelectedAgentId] = useState<number | null>(null);
+  const [assignmentInstructions, setAssignmentInstructions] = useState("");
   const [editingAssignment, setEditingAssignment] = useState<{
     workflowId: number;
     assignmentId: number | null;
   } | null>(null);
 
-  const [selectedAgentId, setSelectedAgentId] = useState<number | null>(null);
-  const [assignmentInstructions, setAssignmentInstructions] = useState("");
+  const [createWorkflowDialogOpen, setCreateWorkflowDialogOpen] =
+    useState(false);
+
+  const [editWorkflowDialogOpen, setEditWorkflowDialogOpen] = useState(false);
+  const [editingWorkflowId, setEditingWorkflowId] = useState<number | null>(null);
+  const [editingWorkflowData, setEditingWorkflowData] =
+    useState<CreateWorkflowData | null>(null);
+
+
+  const openEditWorkflow = (workflow: Workflow) => {
+    setEditingWorkflowId(workflow.id);
+
+    setEditingWorkflowData({
+      name: workflow.name,
+      description: workflow.description,
+      taskTitle: workflow.taskTitle,
+      taskDescription: workflow.taskDescription,
+      outputName: workflow.outputName,
+      outputDescription: workflow.outputDescription,
+      outputFormat: workflow.outputFormat,
+    });
+
+    setEditWorkflowDialogOpen(true);
+  };
+
   const [taskDialogOpen, setTaskDialogOpen] = useState(false);
   const [editingTaskWorkflowId, setEditingTaskWorkflowId] = useState<number | null>(null);
 
@@ -141,108 +182,103 @@ export default function Overview() {
   );
 
   const handleSaveWorkflowTask = (data: {
-  title: string;
-  description: string;
-}) => {
-  if (editingTaskWorkflowId === null) return;
+    title: string;
+    description: string;
+  }) => {
+    if (editingTaskWorkflowId === null) return;
 
-  setWorkflows((prev) =>
-    prev.map((workflow) =>
-      workflow.id === editingTaskWorkflowId
-        ? {
+    setWorkflows((prev) =>
+      prev.map((workflow) =>
+        workflow.id === editingTaskWorkflowId
+          ? {
             ...workflow,
             taskTitle: data.title,
             taskDescription: data.description,
           }
-        : workflow
-    )
-  );
+          : workflow
+      )
+    );
 
-  setTaskDialogOpen(false);
-  setEditingTaskWorkflowId(null);
-};
-
-  const openAddAssignmentModal = (workflowId: number) => {
-    setEditingAssignment({
-      workflowId,
-      assignmentId: null,
-    });
-
-    setSelectedAgentId(null);
-    setAssignmentInstructions("");
-    setAssignmentModalOpen(true);
+    setTaskDialogOpen(false);
+    setEditingTaskWorkflowId(null);
   };
 
-  const openEditAssignmentModal = (
-    workflowId: number,
-    assignment: WorkflowAssignment
-  ) => {
-    setEditingAssignment({
-      workflowId,
-      assignmentId: assignment.id,
-    });
+  const handleSaveWorkflow = (data: CreateWorkflowData) => {
+    if (editingWorkflowId === null) return;
 
-    setSelectedAgentId(assignment.agentId);
-    setAssignmentInstructions(assignment.instructions);
-    setAssignmentModalOpen(true);
+    setWorkflows((current) =>
+      current.map((workflow) =>
+        workflow.id === editingWorkflowId
+          ? {
+            ...workflow,
+            ...data,
+          }
+          : workflow
+      )
+    );
+
+    setEditWorkflowDialogOpen(false);
+    setEditingWorkflowId(null);
+    setEditingWorkflowData(null);
   };
 
-const handleSaveAssignment = (data: {
-  agentId: number;
-  instructions: string;
-}) => {
-  if (!editingAssignment) return;
 
-  const selectedAgent = agents.find(
-    (agent) => agent.id === data.agentId
-  );
+  const handleSaveAssignment = (data: {
+    agentId: number;
+    instructions: string;
+  }) => {
+    if (!editingAssignment) return;
 
-  if (!selectedAgent) return;
+    const selectedAgent = agents.find(
+      (agent) => agent.id === data.agentId
+    );
 
-  setWorkflows((prev) =>
-    prev.map((workflow) => {
-      if (workflow.id !== editingAssignment.workflowId) {
-        return workflow;
-      }
+    if (!selectedAgent) return;
 
-      if (editingAssignment.assignmentId === null) {
-        if (workflow.assignments.length >= MAX_AGENTS) {
+    setWorkflows((prev) =>
+      prev.map((workflow) => {
+        if (workflow.id !== editingAssignment.workflowId) {
           return workflow;
+        }
+
+        if (editingAssignment.assignmentId === null) {
+          if (workflow.assignments.length >= MAX_AGENTS) {
+            return workflow;
+          }
+
+          return {
+            ...workflow,
+            assignments: [
+              ...workflow.assignments,
+              {
+                id: Date.now(),
+                agentId: selectedAgent.id,
+                agentName: selectedAgent.name,
+                instructions: data.instructions,
+                status: "idle" as AgentStatus,
+              },
+            ],
+          };
         }
 
         return {
           ...workflow,
-          assignments: [
-            ...workflow.assignments,
-            {
-              id: Date.now(),
-              agentId: selectedAgent.id,
-              agentName: selectedAgent.name,
-              instructions: data.instructions,
-              status: "idle" as AgentStatus,
-            },
-          ],
-        };
-      }
-
-      return {
-        ...workflow,
-        assignments: workflow.assignments.map((assignment) =>
-          assignment.id === editingAssignment.assignmentId
-            ? {
+          assignments: workflow.assignments.map((assignment) =>
+            assignment.id === editingAssignment.assignmentId
+              ? {
                 ...assignment,
                 agentId: selectedAgent.id,
                 agentName: selectedAgent.name,
                 instructions: data.instructions,
               }
-            : assignment
-        ),
-      };
-    })
-  );
+              : assignment
+          ),
+        };
+      })
+    );
 
-  setEditingAssignment(null);
-};
+    setEditingAssignment(null);
+  };
 
   const toggleExpanded = (id: number) => {
     setExpandedIds((current) =>
@@ -251,15 +287,18 @@ const handleSaveAssignment = (data: {
         : [...current, id],
     );
   };
-
-  const handleCreateWorkflow = () => {
+  const handleCreateWorkflow = (data: CreateWorkflowData) => {
     const id = Date.now();
 
     const newWorkflow: Workflow = {
       id,
-      name: "New workflow",
-      description: "Configure your workflow.",
-      taskTitle: "New task",
+      name: data.name,
+      description: data.description,
+      taskTitle: data.taskTitle,
+      taskDescription: data.taskDescription,
+      outputName: data.outputName,
+      outputDescription: data.outputDescription,
+      outputFormat: data.outputFormat,
       taskStatus: "draft",
       assignments: [],
     };
@@ -313,6 +352,20 @@ const handleSaveAssignment = (data: {
     );
   };
 
+  const openEditAssignmentModal = (
+    workflowId: number,
+    assignment: WorkflowAssignment
+  ) => {
+    setEditingAssignment({
+      workflowId,
+      assignmentId: assignment.id,
+    });
+
+    setSelectedAgentId(assignment.agentId);
+    setAssignmentInstructions(assignment.instructions);
+    setAssignmentModalOpen(true);
+  };
+
   const handleDeleteAgent = (workflowId: number, assignmentId: number) => {
     setWorkflows((current) =>
       current.map((workflow) =>
@@ -356,6 +409,17 @@ const handleSaveAssignment = (data: {
 
     setInstructionTarget(null);
   };
+
+  const openAddAssignmentModal = (workflowId: number) => {
+  setEditingAssignment({
+    workflowId,
+    assignmentId: null,
+  });
+
+  setSelectedAgentId(null);
+  setAssignmentInstructions("");
+  setAssignmentModalOpen(true);
+};
 
   const handleRun = async (workflow: Workflow) => {
     if (workflow.taskStatus === "running" || workflow.assignments.length === 0) return;
@@ -421,8 +485,8 @@ const handleSaveAssignment = (data: {
 
   return (
     <DashboardLayout>
-  
-    
+
+
       <section className="mt-12">
         <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
           <div>
@@ -433,18 +497,44 @@ const handleSaveAssignment = (data: {
           </div>
 
           <button
-            onClick={handleCreateWorkflow}
-            className="flex items-center gap-2 rounded-xl bg-[#8B7CF6] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#7969E8]"
+            onClick={() => setCreateWorkflowDialogOpen(true)}
+            className="hover:cursor-pointer flex items-center gap-2 rounded-xl bg-[#8B7CF6] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#7969E8]"
           >
             <Plus size={17} />
             Create workflow
           </button>
         </div>
 
+
+        <CreateWorkflowDialog
+          open={createWorkflowDialogOpen}
+          onOpenChange={setCreateWorkflowDialogOpen}
+          onSubmit={(data) => {
+            handleCreateWorkflow(data);
+            setCreateWorkflowDialogOpen(false);
+          }}
+        />
+
+        <EditWorkflowDialog
+          open={editWorkflowDialogOpen}
+          onOpenChange={(open) => {
+            setEditWorkflowDialogOpen(open);
+
+            if (!open) {
+              setEditingWorkflowId(null);
+              setEditingWorkflowData(null);
+            }
+          }}
+          workflow={editingWorkflowData}
+          onSubmit={handleSaveWorkflow}
+        />
+
         <div className="space-y-4">
           {visibleWorkflows.map((workflow) => {
             const isExpanded = expandedIds.includes(workflow.id);
             const isRunning = workflow.taskStatus === "running";
+
+
 
             return (
               <article
@@ -487,6 +577,15 @@ const handleSaveAssignment = (data: {
                     </button>
 
                     <button
+                      onClick={() => openEditWorkflow(workflow)}
+                      disabled={isRunning}
+                      title="Edit workflow"
+                      className="rounded-lg p-2 text-[#9299AA] transition-colors hover:bg-[#252B38] hover:text-[#A99FFF] disabled:cursor-not-allowed disabled:opacity-30"
+                    >
+                      <Pencil size={16} />
+                    </button>
+
+                    <button
                       onClick={() => handleDuplicate(workflow)}
                       disabled={isRunning}
                       title="Duplicate workflow"
@@ -514,20 +613,8 @@ const handleSaveAssignment = (data: {
                           <ClipboardList size={14} />
                           Shared task
                         </div>
-                       
-                      {/*  <StatusBadge status={workflow.taskStatus} /> */}
-                         <button
-                          type="button"
-                          disabled={isRunning}
-                          onClick={() => {
-                            setEditingTaskWorkflowId(workflow.id);
-                            setTaskDialogOpen(true);
-                          }}
-                          className="hover:cursor-pointer rounded-lg p-2 text-slate-400 transition hover:bg-white/5 hover:text-purple-400 disabled:cursor-not-allowed disabled:opacity-40"
-                          title="Edit task"
-                        >
-                          <Pencil size={16} />
-                        </button>
+
+    
                       </div>
                       <p className="text-sm font-medium text-[#F1F2F7]">{workflow.taskTitle}</p>
                     </div>
@@ -550,7 +637,7 @@ const handleSaveAssignment = (data: {
                           >
                             <div className="mb-3 flex items-center justify-between">
                               <span className="text-[11px] font-semibold uppercase tracking-wider opacity-80">
-                                STEP {String(index + 1).padStart(2, "0")}
+                                 {String(index + 1).padStart(2, "0")}
                               </span>
                               <Bot size={17} />
                             </div>
@@ -568,9 +655,9 @@ const handleSaveAssignment = (data: {
                                 onClick={() => openEditAssignmentModal(workflow.id, assignment)}
                                 disabled={isRunning}
                                 title={assignment.instructions ? "Edit instructions" : "Add instructions"}
-                                className="rounded-lg p-2 text-current transition-colors hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-30"
+                                className="hover:cursor-pointer rounded-lg p-2 text-current transition-colors hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-30"
                               >
-                                {assignment.instructions ? <Pencil size={16} /> : <Plus size={17} />}
+                                {assignment.agentId ? <Pencil size={16} /> : <Plus size={17} />}
                               </button>
 
                               <button
@@ -596,9 +683,9 @@ const handleSaveAssignment = (data: {
                             <ArrowRight size={18} className="shrink-0 self-center text-[#6F668F]" />
                           )}
                           <button
-                            onClick={() => handleAddAgent(workflow)}
+                           onClick={() => openAddAssignmentModal(workflow.id)}
                             disabled={isRunning}
-                            className="flex min-h-[190px] w-[190px] shrink-0 flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-[#655A91] bg-[#171626]/50 text-[#A99FFF] transition-colors hover:border-[#A99FFF] hover:bg-[#8B7CF6]/10 disabled:cursor-not-allowed disabled:opacity-30"
+                            className="hover:cursor-pointer flex min-h-[190px] w-[190px] shrink-0 flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-[#655A91] bg-[#171626]/50 text-[#A99FFF] transition-colors hover:border-[#A99FFF] hover:bg-[#8B7CF6]/10 disabled:cursor-not-allowed disabled:opacity-30"
                           >
                             <Plus size={24} />
                             <span className="text-sm font-medium">Add agent</span>
@@ -611,59 +698,60 @@ const handleSaveAssignment = (data: {
                     </div>
 
                     {editingTaskWorkflowId !== null && (
-                        <WorkflowTaskDialog
-                          open={taskDialogOpen}
-                          onOpenChange={(open) => {
-                            setTaskDialogOpen(open);
+                      <WorkflowTaskDialog
+                        open={taskDialogOpen}
+                        onOpenChange={(open) => {
+                          setTaskDialogOpen(open);
 
-                            if (!open) {
-                              setEditingTaskWorkflowId(null);
-                            }
-                          }}
-                          initialTitle={
-                            workflows.find((w) => w.id === editingTaskWorkflowId)?.taskTitle ?? ""
+                          if (!open) {
+                            setEditingTaskWorkflowId(null);
                           }
-                          initialDescription={
-                            workflows.find((w) => w.id === editingTaskWorkflowId)?.taskDescription ?? ""
-                          }
-                          onSubmit={handleSaveWorkflowTask}
-                        />
-                      )}
+                        }}
+                        initialTitle={
+                          workflows.find((w) => w.id === editingTaskWorkflowId)?.taskTitle ?? ""
+                        }
+                        initialDescription={
+                          workflows.find((w) => w.id === editingTaskWorkflowId)?.taskDescription ?? ""
+                        }
+                        onSubmit={handleSaveWorkflowTask}
+                      />
+                    )}
 
                     <AgentAssignmentDialog
-                            open={
-                              assignmentModalOpen &&
-                              editingAssignment?.workflowId === workflow.id
-                            }
-                            onOpenChange={(open) => {
-                              setAssignmentModalOpen(open);
+                      open={
+                        assignmentModalOpen &&
+                        editingAssignment?.workflowId === workflow.id
+                      }
+                      onOpenChange={(open) => {
+                        setAssignmentModalOpen(open);
 
-                              if (!open) {
-                                setEditingAssignment(null);
-                              }
-                            }}
-                            initialAgentId={
-                              workflow.assignments.find(
-                                (assignment) =>
-                                  assignment.id === editingAssignment?.assignmentId
-                              )?.agentId ?? null
-                            }
-                            initialInstructions={
-                              workflow.assignments.find(
-                                (assignment) =>
-                                  assignment.id === editingAssignment?.assignmentId
-                              )?.instructions ?? ""
-                            }
-                            excludedAgentIds={workflow.assignments
-                              .filter(
-                                (assignment) =>
-                                  assignment.id !== editingAssignment?.assignmentId
-                              )
-                              .map((assignment) => assignment.agentId)}
-                            onSubmit={handleSaveAssignment}
-                          />
+                        if (!open) {
+                          setEditingAssignment(null);
+                        }
+                      }}
+                      initialAgentId={
+                        workflow.assignments.find(
+                          (assignment) =>
+                            assignment.id === editingAssignment?.assignmentId
+                        )?.agentId ?? null
+                      }
+                      initialInstructions={
+                        workflow.assignments.find(
+                          (assignment) =>
+                            assignment.id === editingAssignment?.assignmentId
+                        )?.instructions ?? ""
+                      }
+                      excludedAgentIds={workflow.assignments
+                        .filter(
+                          (assignment) =>
+                            assignment.id !== editingAssignment?.assignmentId
+                        )
+                        .map((assignment) => assignment.agentId)}
+                      onSubmit={handleSaveAssignment}
+                    />
 
-                    
+
+
 
                     {isRunning && (
                       <div className="mt-3 flex items-center gap-2 text-xs text-blue-300">
@@ -686,7 +774,7 @@ const handleSaveAssignment = (data: {
           )}
         </div>
 
-        
+
 
         {totalPages > 1 && (
           <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
@@ -708,8 +796,8 @@ const handleSaveAssignment = (data: {
                   key={page}
                   onClick={() => setCurrentPage(page)}
                   className={`h-9 min-w-9 rounded-lg px-3 text-xs font-medium ${currentPage === page
-                      ? "bg-[#8B7CF6] text-white"
-                      : "border border-[#303444] text-[#9299AA] hover:bg-[#252B38]"
+                    ? "bg-[#8B7CF6] text-white"
+                    : "border border-[#303444] text-[#9299AA] hover:bg-[#252B38]"
                     }`}
                 >
                   {page}
