@@ -1,5 +1,7 @@
 from pydantic import BaseModel
 from app.enums.status import ExecutionStatus
+
+
 class AssignmentResultResponse(BaseModel):
     assignment_id: int
     agent_id: int

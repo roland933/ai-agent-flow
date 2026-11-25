@@ -51,3 +51,6 @@ class WorkflowTemplate(Base):
         cascade="all, delete-orphan",
         order_by="WorkflowTemplateAssignment.sequence",
     )
+
+
+    
