@@ -1,30 +1,18 @@
 
 import { useState } from "react";
 import {
-  ChevronLeft,
-  ChevronRight,
   GitBranch,
   Plus,
 } from "lucide-react";
 
 import type {
-  AgentStatus,
   WorkflowAssignment,
   Workflow,
 } from "@/features/workflows/types/workflow";
 
 import DashboardLayout from "@/components/layout/DashboardLayout";
-import { useAgentStore } from "@/features/agents/store/agentStore";
 import { type CreateWorkflowData } from "@/features/workflows/components/CreateWorkflowDialog";
-
-import { initialWorkflows } from "@/features/workflows/data/mock-workflows";
-
-
-const PAGE_SIZE = 5;
-const MAX_AGENTS = 3;
-
-
-
+import { useWorkflowPagination } from "@/features/workflows/hooks/useWorkflowPagination";
 import {
   WorkflowCard,
   CreateWorkflowDialog,
@@ -32,162 +20,72 @@ import {
   AgentAssignmentDialog,
   WorkflowTaskDialog,
 } from "@/features/workflows/components";
+
 import Pagination from "@/components/common/ui/Pagination";
+import { WORKFLOW_CONFIG } from "@/features/workflows/config/config";
+
+import { useWorkflowState } from "@/features/workflows/hooks/useWorkflowState";
+import { useWorkflowActions } from "@/features/workflows/hooks/useWorkflowActions";
+import { useWorkflowAgents } from "@/features/workflows/hooks/useWorkflowAgents";
+import { useWorkflowEditor } from "@/features/workflows/hooks/useWorkflowEditor";
 
 export default function Overview() {
-  const [workflows, setWorkflows] = useState(initialWorkflows);
+  const { workflows, setWorkflows } = useWorkflowState();
+
   const [expandedIds, setExpandedIds] = useState<number[]>([1]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [assignmentModalOpen, setAssignmentModalOpen] = useState(false);
-  const [selectedAgentId, setSelectedAgentId] = useState<number | null>(null);
-  const [assignmentInstructions, setAssignmentInstructions] = useState("");
-  const [editingAssignment, setEditingAssignment] = useState<{
-    workflowId: number;
-    assignmentId: number | null;
-  } | null>(null);
-
-  const [createWorkflowDialogOpen, setCreateWorkflowDialogOpen] =
-    useState(false);
-
-  const [editWorkflowDialogOpen, setEditWorkflowDialogOpen] = useState(false);
+  const [createWorkflowDialogOpen, setCreateWorkflowDialogOpen] = useState(false);
   const [editingWorkflowId, setEditingWorkflowId] = useState<number | null>(null);
-  const [editingWorkflowData, setEditingWorkflowData] =
-    useState<CreateWorkflowData | null>(null);
+
+  const {
+    currentPage,
+    setCurrentPage,
+    totalPages,
+    visibleWorkflows,
+  } = useWorkflowPagination(workflows);
 
 
-  const openEditWorkflow = (workflow: Workflow) => {
-    setEditingWorkflowId(workflow.id);
-
-    setEditingWorkflowData({
-      name: workflow.name,
-      description: workflow.description,
-      taskTitle: workflow.taskTitle,
-      taskDescription: workflow.taskDescription,
-      outputName: workflow.outputName,
-      outputDescription: workflow.outputDescription,
-      outputFormat: workflow.outputFormat,
-    });
-
-    setEditWorkflowDialogOpen(true);
-  };
-
-  const [taskDialogOpen, setTaskDialogOpen] = useState(false);
-  const [editingTaskWorkflowId, setEditingTaskWorkflowId] = useState<number | null>(null);
-
-  const [instructionTarget, setInstructionTarget] = useState<{
-    workflowId: number;
-    assignmentId: number;
-  } | null>(null);
-
-  const agents = useAgentStore((state) => state.agents);
-
-  const [instructionText, setInstructionText] = useState("");
-
-  const totalPages = Math.max(1, Math.ceil(workflows.length / PAGE_SIZE));
-
-  const visibleWorkflows = workflows.slice(
-    (currentPage - 1) * PAGE_SIZE,
-    currentPage * PAGE_SIZE,
-  );
-
-  const handleSaveWorkflowTask = (data: {
-    title: string;
-    description: string;
-  }) => {
-    if (editingTaskWorkflowId === null) return;
-
-    setWorkflows((prev) =>
-      prev.map((workflow) =>
-        workflow.id === editingTaskWorkflowId
-          ? {
-            ...workflow,
-            taskTitle: data.title,
-            taskDescription: data.description,
-          }
-          : workflow
-      )
-    );
-
-    setTaskDialogOpen(false);
-    setEditingTaskWorkflowId(null);
-  };
-
-  const handleSaveWorkflow = (data: CreateWorkflowData) => {
-    if (editingWorkflowId === null) return;
-
-    setWorkflows((current) =>
-      current.map((workflow) =>
-        workflow.id === editingWorkflowId
-          ? {
-            ...workflow,
-            ...data,
-          }
-          : workflow
-      )
-    );
-
-    setEditWorkflowDialogOpen(false);
-    setEditingWorkflowId(null);
-    setEditingWorkflowData(null);
-  };
+  const {
+    handleCreateWorkflow,
+    handleDuplicate,
+    handleDelete,
+  } = useWorkflowActions({
+    setWorkflows,
+    setExpandedIds,
+    setCurrentPage,
+  });
 
 
-  const handleSaveAssignment = (data: {
-    agentId: number;
-    instructions: string;
-  }) => {
-    if (!editingAssignment) return;
+  const {
+    agents,
+    assignmentModalOpen,
+    setAssignmentModalOpen,
+    editingAssignment,
+    setEditingAssignment,
+    openEditAssignmentModal,
+    openAddAssignmentModal,
+    handleSaveAssignment,
+    handleDeleteAgent,
+  } = useWorkflowAgents({
+    setWorkflows,
+  });
 
-    const selectedAgent = agents.find(
-      (agent) => agent.id === data.agentId
-    );
+  const {
+  editWorkflowDialogOpen,
+  editingWorkflowData,
+  taskDialogOpen,
+  editingTaskWorkflowId,
+  openEditWorkflow,
+  handleSaveWorkflow,
+  handleSaveWorkflowTask,
+  openEditTask,
+  closeEditWorkflow,
+  closeEditTask,
+  setEditWorkflowDialogOpen,
+  
+} = useWorkflowEditor({
+  setWorkflows,
+});
 
-    if (!selectedAgent) return;
-
-    setWorkflows((prev) =>
-      prev.map((workflow) => {
-        if (workflow.id !== editingAssignment.workflowId) {
-          return workflow;
-        }
-
-        if (editingAssignment.assignmentId === null) {
-          if (workflow.assignments.length >= MAX_AGENTS) {
-            return workflow;
-          }
-
-          return {
-            ...workflow,
-            assignments: [
-              ...workflow.assignments,
-              {
-                id: Date.now(),
-                agentId: selectedAgent.id,
-                agentName: selectedAgent.name,
-                instructions: data.instructions,
-                status: "idle" as AgentStatus,
-              },
-            ],
-          };
-        }
-
-        return {
-          ...workflow,
-          assignments: workflow.assignments.map((assignment) =>
-            assignment.id === editingAssignment.assignmentId
-              ? {
-                ...assignment,
-                agentId: selectedAgent.id,
-                agentName: selectedAgent.name,
-                instructions: data.instructions,
-              }
-              : assignment
-          ),
-        };
-      })
-    );
-
-    setEditingAssignment(null);
-  };
 
   const toggleExpanded = (id: number) => {
     setExpandedIds((current) =>
@@ -196,143 +94,10 @@ export default function Overview() {
         : [...current, id],
     );
   };
-  const handleCreateWorkflow = (data: CreateWorkflowData) => {
-    const id = Date.now();
-
-    const newWorkflow: Workflow = {
-      id,
-      name: data.name,
-      description: data.description,
-      taskTitle: data.taskTitle,
-      taskDescription: data.taskDescription,
-      outputName: data.outputName,
-      outputDescription: data.outputDescription,
-      outputFormat: data.outputFormat,
-      taskStatus: "draft",
-      assignments: [],
-    };
-
-    setWorkflows((current) => [newWorkflow, ...current]);
-    setCurrentPage(1);
-    setExpandedIds((current) => [id, ...current]);
-  };
-
-  const handleDuplicate = (workflow: Workflow) => {
-    const id = Date.now();
-
-    const duplicate: Workflow = {
-      ...workflow,
-      id,
-      name: `${workflow.name} (Copy)`,
-      taskStatus: "draft",
-      assignments: workflow.assignments.map((assignment) => ({
-        ...assignment,
-        id: Math.floor(Math.random() * 1_000_000_000),
-        status: "idle",
-      })),
-    };
-
-    setWorkflows((current) => [duplicate, ...current]);
-    setCurrentPage(1);
-    setExpandedIds((current) => [id, ...current]);
-  };
-
-  const handleDelete = (id: number) => {
-    setWorkflows((current) => current.filter((workflow) => workflow.id !== id));
-    setExpandedIds((current) => current.filter((item) => item !== id));
-  };
 
   const activeWorkflow = workflows.find(
     (workflow) => workflow.id === editingAssignment?.workflowId
   );
-
-  const handleAddAgent = (workflow: Workflow) => {
-    if (workflow.assignments.length >= MAX_AGENTS) return;
-
-    const newAssignment: WorkflowAssignment = {
-      id: Date.now(),
-      agentName: "New Agent",
-      instructions: "",
-      status: "idle",
-    };
-
-    setWorkflows((current) =>
-      current.map((item) =>
-        item.id === workflow.id
-          ? { ...item, assignments: [...item.assignments, newAssignment] }
-          : item,
-      ),
-    );
-  };
-
-  const openEditAssignmentModal = (
-    workflowId: number,
-    assignment: WorkflowAssignment
-  ) => {
-    setEditingAssignment({
-      workflowId,
-      assignmentId: assignment.id,
-    });
-
-    setSelectedAgentId(assignment.agentId);
-    setAssignmentInstructions(assignment.instructions);
-    setAssignmentModalOpen(true);
-  };
-
-  const handleDeleteAgent = (workflowId: number, assignmentId: number) => {
-    setWorkflows((current) =>
-      current.map((workflow) =>
-        workflow.id === workflowId
-          ? {
-            ...workflow,
-            assignments: workflow.assignments.filter(
-              (assignment) => assignment.id !== assignmentId,
-            ),
-          }
-          : workflow,
-      ),
-    );
-  };
-
-  const openInstructions = (workflow: Workflow, assignment: WorkflowAssignment) => {
-    setInstructionTarget({
-      workflowId: workflow.id,
-      assignmentId: assignment.id,
-    });
-    setInstructionText(assignment.instructions);
-  };
-
-  const saveInstructions = () => {
-    if (!instructionTarget) return;
-
-    setWorkflows((current) =>
-      current.map((workflow) =>
-        workflow.id === instructionTarget.workflowId
-          ? {
-            ...workflow,
-            assignments: workflow.assignments.map((assignment) =>
-              assignment.id === instructionTarget.assignmentId
-                ? { ...assignment, instructions: instructionText }
-                : assignment,
-            ),
-          }
-          : workflow,
-      ),
-    );
-
-    setInstructionTarget(null);
-  };
-
-  const openAddAssignmentModal = (workflowId: number) => {
-    setEditingAssignment({
-      workflowId,
-      assignmentId: null,
-    });
-
-    setSelectedAgentId(null);
-    setAssignmentInstructions("");
-    setAssignmentModalOpen(true);
-  };
 
   const handleRun = async (workflow: Workflow) => {
     if (workflow.taskStatus === "running" || workflow.assignments.length === 0) return;
@@ -434,14 +199,7 @@ export default function Overview() {
 
         <EditWorkflowDialog
           open={editWorkflowDialogOpen}
-          onOpenChange={(open) => {
-            setEditWorkflowDialogOpen(open);
-
-            if (!open) {
-              setEditingWorkflowId(null);
-              setEditingWorkflowData(null);
-            }
-          }}
+          onOpenChange={closeEditWorkflow}
           workflow={editingWorkflowData}
           onSubmit={handleSaveWorkflow}
         />
@@ -453,7 +211,7 @@ export default function Overview() {
               workflow={workflow}
               isExpanded={expandedIds.includes(workflow.id)}
               isRunning={workflow.taskStatus === "running"}
-              maxAgents={MAX_AGENTS}
+              maxAgents={WORKFLOW_CONFIG.MAX_AGENTS}
               onToggle={toggleExpanded}
               onRun={handleRun}
               onEdit={openEditWorkflow}
@@ -501,13 +259,7 @@ export default function Overview() {
           {activeTaskWorkflow && (
             <WorkflowTaskDialog
               open={taskDialogOpen}
-              onOpenChange={(open) => {
-                setTaskDialogOpen(open);
-
-                if (!open) {
-                  setEditingTaskWorkflowId(null);
-                }
-              }}
+              onOpenChange={closeEditTask}
               initialTitle={activeTaskWorkflow.taskTitle}
               initialDescription={activeTaskWorkflow.taskDescription}
               onSubmit={handleSaveWorkflowTask}
@@ -530,7 +282,7 @@ export default function Overview() {
             currentPage={currentPage}
             totalPages={totalPages}
             totalItems={workflows.length}
-            pageSize={PAGE_SIZE}
+            pageSize={WORKFLOW_CONFIG.PAGE_SIZE}
             onPageChange={setCurrentPage}
             itemLabel="workflows"
           />
