@@ -26,3 +26,20 @@ class AgentType(Base):
     )
 
     agents: Mapped[list["Agent"]] = relationship(back_populates="agent_type")
+
+    role: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+    responsibilities: Mapped[str | None] = mapped_column(
+        Text,
+        nullable=True,
+    )
+
+    expected_output: Mapped[str | None] = mapped_column(
+        Text,
+        nullable=True,
+    )
+
+    constraints: Mapped[str | None] = mapped_column(
+        Text,
+        nullable=True,
+    )

@@ -7,6 +7,15 @@ from app.models import (
     WorkflowTemplateAssignment,
     Agent,
 )
+
+from app.models import (
+    WorkflowTemplate,
+    WorkflowTemplateAssignment,
+    Agent,
+    Task,
+    AgentAssignment,
+)
+
 from app.services.base_service import BaseService
 
 from app.schemas.workflow_template import (
@@ -22,6 +31,8 @@ class WorkflowTemplateService(
     ]
 ):
     model = WorkflowTemplate
+
+   
 
     def create(
         self,
@@ -172,6 +183,43 @@ class WorkflowTemplateService(
             )
 
         return workflow
+
+    def create_task_from_template(self, db: Session, id: int) -> Task:
+            try:
+                workflow = self.get_by_id(db, id)
+    
+                if not workflow.assignments:
+                    raise HTTPException(
+                        status_code=400,
+                        detail="Workflow template has no assigned agents.",
+                    )
+    
+                task = Task(
+                    title=workflow.task_title,
+                    description=workflow.task_description,
+                )
+    
+                db.add(task)
+                db.flush()
+    
+                for item in workflow.assignments:
+                    assignment = AgentAssignment(
+                        task_id=task.id,
+                        agent_id=item.agent_id,
+                        title=workflow.task_title,
+                        description=item.instructions,
+                        sequence=item.sequence,
+                    )
+                    db.add(assignment)
+    
+                db.commit()
+                db.refresh(task)
+    
+                return task
+    
+            except Exception:
+                db.rollback()
+                raise
 
 
 

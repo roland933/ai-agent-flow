@@ -1,5 +1,5 @@
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, status,BackgroundTasks
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
@@ -9,7 +9,7 @@ from app.schemas.workflow_template import (
     WorkflowTemplateResponse,
 )
 from app.services.workflow_template_service import workflow_template_service
-
+from app.services.workflow_service import workflow_service
 
 router = APIRouter(
     prefix="/workflow-templates",
@@ -71,3 +71,23 @@ def update_workflow_template(
     db: Session = Depends(get_db),
 ):
     return workflow_template_service.update(db, id, data)
+
+
+@router.post("/{id}/run", status_code=status.HTTP_202_ACCEPTED)
+def run_workflow_template(
+    id: int,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+):
+    task = workflow_template_service.create_task_from_template(db, id)
+
+    background_tasks.add_task(
+        workflow_service.execute_workflow_background,
+        task.id,
+    )
+
+    return {
+        "task_id": task.id,
+        "status": "accepted",
+        "message": "Workflow execution started.",
+    }

@@ -1,6 +1,8 @@
 import httpx
 import os
+import logging
 
+logger = logging.getLogger(__name__)
 
 class LLMService:
 
@@ -11,17 +13,27 @@ class LLMService:
 
 
     async def execute_agent(
-    self,
+   self,
     agent_name: str,
-    agent_type: str,
+    agent_type_name: str,
+    agent_type_description: str | None,
+    agent_role: str | None,
+    agent_responsibilities: str | None,
+    agent_expected_output: str | None,
+    agent_constraints: str | None,
     assignment_title: str,
     assignment_description: str | None,
-    previous_output: dict | None,
+    previous_output: str | None
 ) -> str:
 
         prompt = self.build_prompt(
             agent_name=agent_name,
-            agent_type=agent_type,
+            agent_type_name=agent_type_name,
+            agent_type_description=agent_type_description,
+            agent_role=agent_role,
+            agent_responsibilities=agent_responsibilities,
+            agent_expected_output=agent_expected_output,
+            agent_constraints=agent_constraints,
             assignment_title=assignment_title,
             assignment_description=assignment_description,
             previous_output=previous_output,
@@ -32,35 +44,97 @@ class LLMService:
         return result
 
 
+
     def build_prompt(
-    self,
-    agent_name: str,
-    agent_type: str,
-    assignment_title: str,
-    assignment_description: str | None,
-    previous_output: dict | None,
-) -> str:
+        self,
+        agent_name: str,
+        agent_type_name: str,
+        agent_type_description: str | None,
+        agent_role: str | None,
+        agent_responsibilities: str | None,
+        agent_expected_output: str | None,
+        agent_constraints: str | None,
+        assignment_title: str,
+        assignment_description: str | None,
+        previous_output: str | None
+    ) -> str:
+
+        if previous_output:
+             logger.info("Previous output detected. Entering previous agent context branch.")
+             logger.info("Previous output length: %s characters", len(previous_output))
+
+
+             previous_agent_context = f"""
+             PREVIOUS AGENT'S RESULT:
+
+             {previous_output}
+             
+
+            IMPORTANT WORKFLOW RULES:
+
+            - The previous agent has already completed its assigned task.
+            - Do not perform the previous agent's task again.
+            - Do not rewrite, summarize or copy the previous result.
+            - Use the previous result only as source material for your own task.
+            - Focus exclusively on your assigned responsibilities.
+            - Add new analysis, conclusions or insights.
+            - If information is missing, explicitly identify the gap.
+            """
+        else:
+            logger.info("No previous output. Entering first agent context branch.")
+            previous_agent_context = """
+            You are the first agent in this workflow.
+            Start the assigned task from the beginning.
+            """
 
         prompt = f"""
         You are an AI agent named {agent_name}.
 
-        Your role:
-        {agent_type}
+        AGENT TYPE:
+        {agent_type_name}
 
-        Your task:
+        TYPE DESCRIPTION:
+        {agent_type_description or "Not specified."}
+
+        YOUR ROLE:
+        {agent_role or "Not specified."}
+
+        YOUR RESPONSIBILITIES:
+        {agent_responsibilities or "Follow the specific task instructions."}
+
+        YOUR TASK:
         {assignment_title}
 
-        Task instructions:
+        TASK INSTRUCTIONS:
         {assignment_description or "No additional instructions provided."}
 
-        Previous agent output:
-        {previous_output or "This is the first agent in the workflow."}
+        EXPECTED OUTPUT:
+        {agent_expected_output or "Provide a clear and structured result."}
 
-        Complete your assigned task based on your role and instructions.
-        Provide a clear and structured result.
+        CONSTRAINTS:
+        {agent_constraints or "Do not invent facts or data."}
+
+        {previous_agent_context}
+
+        GENERAL RULES:
+        - Follow your assigned role and responsibilities.
+        - Focus only on your specific task.
+        - Produce actual results, not a description of how you would work.
+        - Follow the expected output structure.
+        - Respect all constraints.
+        - Do not invent facts, statistics or sources.
         """
 
+        logger.info(
+            "Generated prompt for agent '%s' (type: %s)",
+            agent_name,
+            agent_type_name,
+        )
+
+        logger.debug("Full prompt:\n%s", prompt)
+
         return prompt.strip()
+
 
 
     async def generate(self, prompt: str) -> str:

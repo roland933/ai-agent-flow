@@ -52,5 +52,9 @@ class WorkflowTemplate(Base):
         order_by="WorkflowTemplateAssignment.sequence",
     )
 
+    tasks: Mapped[list["Task"]] = relationship(
+        back_populates="workflow_template"
+    )
+
 
     

@@ -6,6 +6,10 @@ from app.enums.status import ExecutionStatus
 from app.db.session import SessionLocal
 from app.schemas.workflow import WorkflowExecutionResponse, AssignmentResultResponse
 from app.services.llm_service import llm_service
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 class WorkflowService:
 
@@ -57,9 +61,16 @@ class WorkflowService:
                 db.commit()
                 db.refresh(assignment)
 
+                agent_type = assignment.agent.agent_type
+
                 result = await llm_service.execute_agent(
                     agent_name=assignment.agent.name,
-                    agent_type=assignment.agent.agent_type.description,
+                    agent_type_name=agent_type.name,
+                    agent_type_description=agent_type.description,
+                    agent_role=agent_type.role,
+                    agent_responsibilities=agent_type.responsibilities,
+                    agent_expected_output=agent_type.expected_output,
+                    agent_constraints=agent_type.constraints,
                     assignment_title=assignment.title,
                     assignment_description=assignment.description,
                     previous_output=previous_output,
@@ -77,10 +88,11 @@ class WorkflowService:
                 db.refresh(assignment)
                     
 
-                previous_output = assignment.output_data
+                previous_output = result
 
         except Exception:
             db.rollback()
+            logger.exception("Workflow execution failed for task_id=%s", task_id)
             task = task_service.get_by_id(db, task_id)
             assignment = db.query(AgentAssignment).filter(
                 AgentAssignment.id == assignment.id

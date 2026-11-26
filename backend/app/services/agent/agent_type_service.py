@@ -2,13 +2,14 @@ from sqlalchemy.orm import Session
 from fastapi import HTTPException
 
 from app.models import AgentType
-from app.schemas.agent import AgentTypeCreate,AgenTypeUpdate
+from app.schemas.agent_type import AgentTypeCreate,AgentTypeUpdate
 
 
 def create_agent_type(
     db: Session,
     agent_type_data: AgentTypeCreate,
-):
+)->AgentType:
+    
     existing_type = db.query(AgentType).filter(
         AgentType.name == agent_type_data.name
     ).first()
@@ -19,7 +20,11 @@ def create_agent_type(
     agent_type = AgentType(
         name=agent_type_data.name,
         description=agent_type_data.description,
-        is_active = agent_type_data.is_active
+        is_active=agent_type_data.is_active,
+        role=agent_type_data.role,
+        responsibilities=agent_type_data.responsibilities,
+        expected_output=agent_type_data.expected_output,
+        constraints=agent_type_data.constraints,
     )
 
     db.add(agent_type)
@@ -28,10 +33,10 @@ def create_agent_type(
 
     return agent_type
 
-def get_agent_types(db:Session):
+def get_agent_types(db:Session)->AgentType:
     return db.query(AgentType).all()
 
-def get_agent_type_by_id(db: Session, agent_type_id: int):
+def get_agent_type_by_id(db: Session, agent_type_id: int)->AgentType:
     agent_type = db.query(AgentType).filter(
         AgentType.id == agent_type_id
     ).first()
@@ -44,7 +49,7 @@ def get_agent_type_by_id(db: Session, agent_type_id: int):
 
     return agent_type
 
-def update_agent_type(db: Session, id: int, agent_type_data: AgenTypeUpdate):
+def update_agent_type(db: Session, id: int, agent_type_data: AgentTypeUpdate) ->AgentType:
     agent_type = get_agent_type_by_id(db, id)
 
     update_data = agent_type_data.model_dump(exclude_unset=True)

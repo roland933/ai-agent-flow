@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from app.db.session import get_db
 from app.models import AgentType
-from app.schemas.agent import  AgentTypeCreate,AgentTypeResponse,AgenTypeUpdate
+from app.schemas.agent_type import  AgentTypeCreate,AgentTypeResponse,AgentTypeUpdate
 from app.services.agent.agent_type_service import (
     create_agent_type,
     get_agent_types as get_agent_types_service,
@@ -33,7 +33,7 @@ def get_agent_types(db: Session = Depends(get_db)):
 @router.patch("/{id}",response_model=AgentTypeResponse)
 def update_agent_type_endpoint(
     id:int,
-    agent_type_data:AgenTypeUpdate,
+    agent_type_data:AgentTypeUpdate,
     db: Session=Depends(get_db),
 ):
     
