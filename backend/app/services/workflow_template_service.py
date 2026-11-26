@@ -1,11 +1,16 @@
 
-from sqlalchemy.orm import Session,joinedload
+from sqlalchemy.orm import Session,joinedload,selectinload
 from fastapi import HTTPException
 
 from app.models import (
     WorkflowTemplate,
     WorkflowTemplateAssignment,
     Agent,
+)
+
+from app.schemas.workflow_template import (
+    WorkflowTemplateOverviewResponse,
+    WorkflowRunResponse,
 )
 
 from app.models import (
@@ -197,6 +202,7 @@ class WorkflowTemplateService(
                 task = Task(
                     title=workflow.task_title,
                     description=workflow.task_description,
+                    workflow_template_id=workflow.id,
                 )
     
                 db.add(task)
@@ -220,6 +226,60 @@ class WorkflowTemplateService(
             except Exception:
                 db.rollback()
                 raise
+
+    def get_workflow_runs(self, db: Session, id: int):
+            # Check if workflow template exists
+            self.get_by_id(db, id)
+
+            # Get all executions belonging to this template
+            runs = (
+                db.query(Task)
+                .filter(Task.workflow_template_id == id)
+                .order_by(Task.id.desc())
+                .all()
+            )
+
+            return runs
+    
+    def get_overview(self, db: Session):
+        workflows = (
+            db.query(WorkflowTemplate)
+            .options(
+                selectinload(WorkflowTemplate.assignments)
+                .joinedload(WorkflowTemplateAssignment.agent),
+                selectinload(WorkflowTemplate.tasks),
+            )
+            .order_by(WorkflowTemplate.id.desc())
+            .all()
+        )
+
+        results = []
+
+        for workflow in workflows:
+            runs = sorted(
+                workflow.tasks,
+                key=lambda task: task.id,
+                reverse=True,
+            )
+
+            workflow_data = WorkflowTemplateOverviewResponse.model_validate(
+                workflow
+            )
+
+            workflow_data = workflow_data.model_copy(
+                update={
+                    "last_run": (
+                        WorkflowRunResponse.model_validate(runs[0])
+                        if runs
+                        else None
+                    ),
+                    "total_runs": len(runs),
+                }
+            )
+
+            results.append(workflow_data)
+
+        return results
 
 
 

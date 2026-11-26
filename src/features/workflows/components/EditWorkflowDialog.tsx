@@ -19,7 +19,7 @@ type EditWorkflowDialogProps = {
     onSubmit: (data: CreateWorkflowData) => void;
 };
 
-export function EditWorkflowDialog({
+export default function EditWorkflowDialog({
     open,
     onOpenChange,
     workflow,

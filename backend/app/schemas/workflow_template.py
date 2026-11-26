@@ -1,29 +1,6 @@
 
 from pydantic import BaseModel, Field, AliasPath
-
-
-class WorkflowTemplateAssignmentCreate(BaseModel):
-    agent_id: int
-    instructions: str | None = None
-    sequence: int = Field(ge=1)
-
-
-class WorkflowTemplateCreate(BaseModel):
-    name: str = Field(min_length=1, max_length=150)
-    description: str | None = None
-
-    task_title: str = Field(min_length=1, max_length=150)
-    task_description: str | None = None
-
-    output_name: str = Field(min_length=1, max_length=150)
-    output_description: str | None = None
-    output_format: str = "markdown"
-
-    assignments: list[WorkflowTemplateAssignmentCreate] = Field(
-        default_factory=list,
-        max_length=3,
-    )
-from pydantic import BaseModel, Field
+from app.enums.status import ExecutionStatus
 
 
 # CREATE SCHEMAS
@@ -51,6 +28,8 @@ class WorkflowTemplateCreate(BaseModel):
     )
 
 
+# ASSIGNMENT RESPONSE
+
 class WorkflowTemplateAssignmentResponse(BaseModel):
     id: int
     agent_id: int
@@ -62,6 +41,8 @@ class WorkflowTemplateAssignmentResponse(BaseModel):
 
     model_config = {"from_attributes": True}
 
+
+# WORKFLOW RESPONSE
 
 class WorkflowTemplateResponse(BaseModel):
     id: int
@@ -80,6 +61,8 @@ class WorkflowTemplateResponse(BaseModel):
     model_config = {"from_attributes": True}
 
 
+# UPDATE SCHEMA
+
 class WorkflowTemplateUpdate(BaseModel):
     name: str | None = Field(default=None, min_length=1, max_length=150)
     description: str | None = None
@@ -95,3 +78,20 @@ class WorkflowTemplateUpdate(BaseModel):
         default=None,
         max_length=3,
     )
+
+
+# RUN HISTORY
+
+class WorkflowRunResponse(BaseModel):
+    id: int
+    title: str
+    status: ExecutionStatus
+
+    model_config = {"from_attributes": True}
+
+
+# OVERVIEW RESPONSE
+
+class WorkflowTemplateOverviewResponse(WorkflowTemplateResponse):
+    last_run: WorkflowRunResponse | None = None
+    total_runs: int = 0

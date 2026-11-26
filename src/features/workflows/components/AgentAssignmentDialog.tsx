@@ -18,7 +18,7 @@ type AgentAssignmentDialogProps = {
   }) => void;
 };
 
-export function AgentAssignmentDialog({
+export default function AgentAssignmentDialog({
   open,
   onOpenChange,
   initialAgentId = null,

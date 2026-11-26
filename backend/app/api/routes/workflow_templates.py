@@ -7,6 +7,8 @@ from app.schemas.workflow_template import (
     WorkflowTemplateCreate,
     WorkflowTemplateUpdate,
     WorkflowTemplateResponse,
+    WorkflowRunResponse,
+    WorkflowTemplateOverviewResponse
 )
 from app.services.workflow_template_service import workflow_template_service
 from app.services.workflow_service import workflow_service
@@ -38,6 +40,12 @@ def get_workflow_templates(
 ):
     return workflow_template_service.get_all(db)
 
+@router.get(
+    "/overview",
+    response_model=list[WorkflowTemplateOverviewResponse],
+)
+def get_workflow_overview(db: Session = Depends(get_db)):
+    return workflow_template_service.get_overview(db)
 
 @router.get(
     "/{id}",
@@ -59,6 +67,8 @@ def delete_workflow_template(
     db: Session = Depends(get_db),
 ):
     workflow_template_service.delete(db, id)
+
+
 
 
 @router.patch(
@@ -91,3 +101,9 @@ def run_workflow_template(
         "status": "accepted",
         "message": "Workflow execution started.",
     }
+
+@router.get("/{id}/runs", response_model=list[WorkflowRunResponse])
+def get_workflow_runs(id: int, db: Session = Depends(get_db)):
+    return workflow_template_service.get_workflow_runs(db, id)
+
+

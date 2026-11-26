@@ -26,7 +26,7 @@ export type CreateWorkflowData = {
     outputFormat: "markdown" | "json" | "text";
 };
 
-export function CreateWorkflowDialog({
+export default function CreateWorkflowDialog({
     open,
     onOpenChange,
     onSubmit,

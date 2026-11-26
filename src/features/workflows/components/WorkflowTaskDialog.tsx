@@ -15,7 +15,7 @@ type WorkflowTaskDialogProps = {
   }) => void;
 };
 
-export function WorkflowTaskDialog({
+export default function WorkflowTaskDialog({
   open,
   onOpenChange,
   initialTitle,
