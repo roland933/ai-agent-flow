@@ -69,7 +69,7 @@ export default function AgentAssignmentDialog({
       onOpenChange={onOpenChange}
       title={initialAgentId === null ? "Add agent" : "Edit agent"}
       description="Select an agent and configure its instructions."
-      size="lg"
+      size="2xl"
       footer={
         <>
           <Button

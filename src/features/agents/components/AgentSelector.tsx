@@ -5,25 +5,36 @@ type AgentSelectorProps = {
   agents: Agent[];
   selectedAgents: number[];
   onChange: (selectedAgents: number[]) => void;
+  maxSelected?: number;
 };
 
 export default function AgentSelector({
   agents,
   selectedAgents,
   onChange,
+  maxSelected
 }: AgentSelectorProps) {
-  const toggleAgent = (agentId: number) => {
-    const isSelected = selectedAgents.includes(agentId);
+ const toggleAgent = (agentId: number) => {
+  const isSelected = selectedAgents.includes(agentId);
 
-    if (isSelected) {
-      onChange(selectedAgents.filter((id) => id !== agentId));
-    } else {
-      onChange([...selectedAgents, agentId]);
-    }
-  };
+
+
+  if (isSelected) {
+    onChange(selectedAgents.filter((id) => id !== agentId));
+    return;
+  }
+
+  if (maxSelected && selectedAgents.length >= maxSelected) {
+    return;
+  }
+
+  onChange([...selectedAgents, agentId]);
+};
+
+
 
   return (
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3" >
       {agents.map((agent) => {
         const isSelected = selectedAgents.includes(agent.id);
 

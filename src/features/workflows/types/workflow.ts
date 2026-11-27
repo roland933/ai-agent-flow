@@ -47,3 +47,10 @@ export interface CreateWorkflowData  {
 
     error?: string | null;
 };
+
+
+export interface WorkflowAssignmentDraft {
+  agentId: number;
+  instructions: string;
+  sequence: number;
+}

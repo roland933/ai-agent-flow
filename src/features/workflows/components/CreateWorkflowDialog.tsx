@@ -11,7 +11,8 @@ import {
     TabsList,
     TabsTrigger,
 } from "@/components/ui/tabs";
-import type { CreateWorkflowData } from "../types/workflow";
+import type { CreateWorkflowData, WorkflowAssignmentDraft } from "../types/workflow";
+import WorkflowAgentAssignmentForm from "./WorkflowAgentAssignmentForm";
 
 type CreateWorkflowDialogProps = {
     open: boolean;
@@ -60,8 +61,7 @@ export default function CreateWorkflowDialog({
 
     const [outputName, setOutputName] = useState("");
     const [outputDescription, setOutputDescription] = useState("");
-    const [outputFormat, setOutputFormat] =
-        useState<CreateWorkflowData["outputFormat"]>("markdown");
+    const [outputFormat, setOutputFormat] =  useState<CreateWorkflowData["outputFormat"]>("markdown");
 
     const handleSubmit = async () => {
         if (!name.trim() || !taskTitle.trim() || !outputName.trim() || isSubmitting) {
@@ -79,12 +79,14 @@ export default function CreateWorkflowDialog({
         });
     };
 
+    const [assignments, setAssignments] = useState<WorkflowAssignmentDraft[]>([]);
+
     return (
         <Dialog
             open={open}
             onOpenChange={onOpenChange}
             title="Create workflow"
-            size="2xl"
+            size="7xl"
             footer={
                 <Button
                     title={isSubmitting ? "Creating..." : "Create workflow"}
@@ -99,8 +101,8 @@ export default function CreateWorkflowDialog({
                 className="w-full"
             >
                 <TabsList className="mb-4 w-full">
-                    <TabsTrigger value="general">General</TabsTrigger>
-                    <TabsTrigger value="agents">Agents</TabsTrigger>
+                    <TabsTrigger value="general" className="hover:cursor-pointer">General</TabsTrigger>
+                    <TabsTrigger value="agents" className="hover:cursor-pointer">Agents</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="general">
@@ -261,7 +263,10 @@ export default function CreateWorkflowDialog({
 
                 <TabsContent value="agents">
                     <div className="min-h-[300px] py-4">
-                        Agent settings
+                        <WorkflowAgentAssignmentForm
+                            assignments={assignments}
+                            onChange={setAssignments}
+                        />
                     </div>
                 </TabsContent>
             </Tabs>
