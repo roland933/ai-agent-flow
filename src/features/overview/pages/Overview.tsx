@@ -1,18 +1,11 @@
 
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import {
   GitBranch,
   Plus,
 } from "lucide-react";
 
-import type {
-  WorkflowAssignment,
-  Workflow,
-} from "@/features/workflows/types/workflow";
-
 import DashboardLayout from "@/components/layout/DashboardLayout";
-import { type CreateWorkflowData } from "@/features/workflows/components/CreateWorkflowDialog";
-import { useWorkflowPagination } from "@/features/workflows/hooks/useWorkflowPagination";
 import {
   WorkflowCard,
   CreateWorkflowDialog,
@@ -24,17 +17,40 @@ import {
 import Pagination from "@/components/common/ui/Pagination";
 import { WORKFLOW_CONFIG } from "@/features/workflows/config/config";
 
-import { useWorkflowState } from "@/features/workflows/hooks/useWorkflowState";
-import { useWorkflowActions } from "@/features/workflows/hooks/useWorkflowActions";
-import { useWorkflowAgents } from "@/features/workflows/hooks/useWorkflowAgents";
-import { useWorkflowEditor } from "@/features/workflows/hooks/useWorkflowEditor";
+import {
+  useWorkflowState,
+  useWorkflowPagination,
+  useWorkflowActions,
+  useWorkflowAgents,
+  useWorkflowEditor,
+  useWorkflowRunner,
+} from "@/features/workflows/hooks";
+
+
+import { useWorkflows } from "@/features/workflows/hooks/useWorkflows";
+import { EmptyState } from "@/components/common/ui/EmptyState";
+
+import Loading from "@/components/common/ui/Loading";
+
 
 export default function Overview() {
+
+  const {
+    data: fetchedWorkflows,
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useWorkflows();
+
+
+
+
+
   const { workflows, setWorkflows } = useWorkflowState();
 
   const [expandedIds, setExpandedIds] = useState<number[]>([1]);
   const [createWorkflowDialogOpen, setCreateWorkflowDialogOpen] = useState(false);
-  const [editingWorkflowId, setEditingWorkflowId] = useState<number | null>(null);
 
   const {
     currentPage,
@@ -56,7 +72,6 @@ export default function Overview() {
 
 
   const {
-    agents,
     assignmentModalOpen,
     setAssignmentModalOpen,
     editingAssignment,
@@ -70,22 +85,23 @@ export default function Overview() {
   });
 
   const {
-  editWorkflowDialogOpen,
-  editingWorkflowData,
-  taskDialogOpen,
-  editingTaskWorkflowId,
-  openEditWorkflow,
-  handleSaveWorkflow,
-  handleSaveWorkflowTask,
-  openEditTask,
-  closeEditWorkflow,
-  closeEditTask,
-  setEditWorkflowDialogOpen,
-  
-} = useWorkflowEditor({
-  setWorkflows,
-});
+    editWorkflowDialogOpen,
+    editingWorkflowData,
+    taskDialogOpen,
+    editingTaskWorkflowId,
+    openEditWorkflow,
+    handleSaveWorkflow,
+    handleSaveWorkflowTask,
+    closeEditWorkflow,
+    closeEditTask,
+  } = useWorkflowEditor({
+    setWorkflows,
+  });
 
+
+  const { handleRun } = useWorkflowRunner({
+    setWorkflows,
+  });
 
   const toggleExpanded = (id: number) => {
     setExpandedIds((current) =>
@@ -99,71 +115,27 @@ export default function Overview() {
     (workflow) => workflow.id === editingAssignment?.workflowId
   );
 
-  const handleRun = async (workflow: Workflow) => {
-    if (workflow.taskStatus === "running" || workflow.assignments.length === 0) return;
-
-    const workflowId = workflow.id;
-
-    setWorkflows((current) =>
-      current.map((item) =>
-        item.id === workflowId
-          ? {
-            ...item,
-            taskStatus: "running",
-            assignments: item.assignments.map((assignment, index) => ({
-              ...assignment,
-              status: index === 0 ? "running" : "pending",
-            })),
-          }
-          : item,
-      ),
-    );
-
-    // Demo-only sequential execution.
-    for (let index = 0; index < workflow.assignments.length; index++) {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
-      setWorkflows((current) =>
-        current.map((item) =>
-          item.id === workflowId
-            ? {
-              ...item,
-              assignments: item.assignments.map((assignment, assignmentIndex) => ({
-                ...assignment,
-                status:
-                  assignmentIndex < index
-                    ? "completed"
-                    : assignmentIndex === index
-                      ? "completed"
-                      : assignmentIndex === index + 1
-                        ? "running"
-                        : "pending",
-              })),
-            }
-            : item,
-        ),
-      );
-    }
-
-    setWorkflows((current) =>
-      current.map((item) =>
-        item.id === workflowId
-          ? {
-            ...item,
-            taskStatus: "completed",
-            assignments: item.assignments.map((assignment) => ({
-              ...assignment,
-              status: "completed",
-            })),
-          }
-          : item,
-      ),
-    );
-  };
-
   const activeTaskWorkflow = workflows.find(
     (workflow) => workflow.id === editingTaskWorkflowId
   );
+
+  const activeAssignment = activeWorkflow?.assignments.find(
+    (assignment) => assignment.id === editingAssignment?.assignmentId
+  );
+
+  const excludedAgentIds = activeWorkflow?.assignments
+    .filter(
+      (assignment) => assignment.id !== editingAssignment?.assignmentId
+    )
+    .map((assignment) => assignment.agentId)
+
+
+  useEffect(() => {
+    if (fetchedWorkflows) {
+      setWorkflows(fetchedWorkflows);
+    }
+  }, [fetchedWorkflows, setWorkflows]);
+
 
   return (
     <DashboardLayout>
@@ -205,23 +177,50 @@ export default function Overview() {
         />
 
         <div className="space-y-4">
-          {visibleWorkflows.map((workflow) => (
-            <WorkflowCard
-              key={workflow.id}
-              workflow={workflow}
-              isExpanded={expandedIds.includes(workflow.id)}
-              isRunning={workflow.taskStatus === "running"}
-              maxAgents={WORKFLOW_CONFIG.MAX_AGENTS}
-              onToggle={toggleExpanded}
-              onRun={handleRun}
-              onEdit={openEditWorkflow}
-              onDuplicate={handleDuplicate}
-              onDelete={handleDelete}
-              onEditAgent={openEditAssignmentModal}
-              onDeleteAgent={handleDeleteAgent}
-              onAddAgent={openAddAssignmentModal}
-            />
-          ))}
+          {isLoading ? (
+            <Loading />
+          ) : isError ? (
+            <div className="flex min-h-[300px] flex-col items-center justify-center text-center">
+              <p className="text-red-400">
+                {error instanceof Error
+                  ? error.message
+                  : "Failed to load workflows."}
+              </p>
+
+              <button
+                onClick={() => refetch()}
+                className="mt-4 rounded-xl bg-[#8B7CF6] px-4 py-2 text-white"
+              >
+                Try again
+              </button>
+            </div>
+          ) : (
+            <>
+              {visibleWorkflows.map((workflow) => (
+                <WorkflowCard
+                  key={workflow.id}
+                  workflow={workflow}
+                  isExpanded={expandedIds.includes(workflow.id)}
+                  isRunning={workflow.taskStatus === "running"}
+                  maxAgents={WORKFLOW_CONFIG.MAX_AGENTS}
+                  onToggle={toggleExpanded}
+                  onRun={handleRun}
+                  onEdit={openEditWorkflow}
+                  onDuplicate={handleDuplicate}
+                  onDelete={handleDelete}
+                  onEditAgent={openEditAssignmentModal}
+                  onDeleteAgent={handleDeleteAgent}
+                  onAddAgent={openAddAssignmentModal}
+                />
+              ))}
+
+              {workflows.length === 0 && (
+                <EmptyState title="No workflows yet" icon={<GitBranch className="mx-auto mb-3 text-[#777D8B]" size={28} />} />
+
+              )}
+            </>
+          )}
+
 
           {activeWorkflow && (
             <AgentAssignmentDialog
@@ -233,24 +232,9 @@ export default function Overview() {
                   setEditingAssignment(null);
                 }
               }}
-              initialAgentId={
-                activeWorkflow.assignments.find(
-                  (assignment) =>
-                    assignment.id === editingAssignment?.assignmentId
-                )?.agentId ?? null
-              }
-              initialInstructions={
-                activeWorkflow.assignments.find(
-                  (assignment) =>
-                    assignment.id === editingAssignment?.assignmentId
-                )?.instructions ?? ""
-              }
-              excludedAgentIds={activeWorkflow.assignments
-                .filter(
-                  (assignment) =>
-                    assignment.id !== editingAssignment?.assignmentId
-                )
-                .map((assignment) => assignment.agentId)}
+              initialAgentId={activeAssignment?.agentId ?? null}
+              initialInstructions={activeAssignment?.instructions ?? ""}
+              excludedAgentIds={excludedAgentIds}
               onSubmit={handleSaveAssignment}
             />
           )}
@@ -266,13 +250,7 @@ export default function Overview() {
             />
           )}
 
-          {workflows.length === 0 && (
-            <div className="rounded-2xl border border-dashed border-[#303444] py-12 text-center">
-              <GitBranch className="mx-auto mb-3 text-[#777D8B]" size={28} />
-              <p className="text-xl font-medium text-[#F1F2F7]">No workflows yet</p>
-              <p className="mt-1 text-md text-[#9299AA]">Create your first workflow to get started.</p>
-            </div>
-          )}
+
         </div>
 
 
@@ -289,6 +267,6 @@ export default function Overview() {
         )}
       </section>
 
-    </DashboardLayout>
+    </DashboardLayout >
   );
 }

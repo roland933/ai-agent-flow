@@ -49,7 +49,7 @@ export default function WorkflowCard({
   onAddAgent,
 }: WorkflowCardProps) {
   return (
-    <article className="overflow-hidden rounded-2xl border border-[#303444] bg-[#121620] shadow-lg shadow-black/10">
+    <article className="overflow-hidden rounded-2xl border border-[#303444] bg-[#121620] shadow-lg shadow-black/10 ">
       <div className="flex flex-wrap items-center justify-between gap-4 p-5">
         <button
           onClick={() => onToggle(workflow.id)}
@@ -83,7 +83,7 @@ export default function WorkflowCard({
             onClick={() => onRun(workflow)}
             disabled={isRunning || workflow.assignments.length === 0}
             title="Run workflow"
-            className="flex items-center gap-2 rounded-lg bg-[#8B7CF6] px-3 py-2 text-xs font-medium text-white transition-colors hover:bg-[#7969E8] disabled:cursor-not-allowed disabled:bg-[#303444] disabled:text-[#777D8B]"
+            className="hover:cursor-pointer flex items-center gap-2 rounded-lg bg-[#8B7CF6] px-3 py-2 text-xs font-medium text-white transition-colors hover:bg-[#7969E8] disabled:cursor-not-allowed disabled:bg-[#303444] disabled:text-[#777D8B]"
           >
             {isRunning ? <Lock size={14} /> : <Play size={14} />}
             {isRunning ? "Running..." : "Run"}
@@ -93,7 +93,7 @@ export default function WorkflowCard({
             onClick={() => onEdit(workflow)}
             disabled={isRunning}
             title="Edit workflow"
-            className="rounded-lg p-2 text-[#9299AA] transition-colors hover:bg-[#252B38] hover:text-[#A99FFF] disabled:cursor-not-allowed disabled:opacity-30"
+            className="hover:cursor-pointer  rounded-lg p-2 text-[#9299AA] transition-colors hover:bg-[#252B38] hover:text-[#A99FFF] disabled:cursor-not-allowed disabled:opacity-30"
           >
             <Pencil size={16} />
           </button>
@@ -102,7 +102,7 @@ export default function WorkflowCard({
             onClick={() => onDuplicate(workflow)}
             disabled={isRunning}
             title="Duplicate workflow"
-            className="rounded-lg p-2 text-[#9299AA] transition-colors hover:bg-[#252B38] hover:text-[#A99FFF] disabled:opacity-30"
+            className="hover:cursor-pointer  rounded-lg p-2 text-[#9299AA] transition-colors hover:bg-[#252B38] hover:text-[#A99FFF] disabled:opacity-30"
           >
             <Copy size={16} />
           </button>
@@ -111,7 +111,7 @@ export default function WorkflowCard({
             onClick={() => onDelete(workflow.id)}
             disabled={isRunning}
             title="Delete workflow"
-            className="rounded-lg p-2 text-[#9299AA] transition-colors hover:bg-red-500/10 hover:text-red-400 disabled:opacity-30"
+            className="hover:cursor-pointer rounded-lg p-2 text-[#9299AA] transition-colors hover:bg-red-500/10 hover:text-red-400 disabled:opacity-30"
           >
             <Trash2 size={16} />
           </button>

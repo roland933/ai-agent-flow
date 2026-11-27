@@ -1,13 +1,8 @@
 import { useState } from "react";
-
 import type { Workflow } from "../types/workflow";
-import { initialWorkflows } from "../data/mock-workflows";
 
 export function useWorkflowState() {
-  const [workflows, setWorkflows] = useState<Workflow[]>(initialWorkflows);
+  const [workflows, setWorkflows] = useState<Workflow[]>([]);
 
-  return {
-    workflows,
-    setWorkflows,
-  };
+  return { workflows, setWorkflows };
 }

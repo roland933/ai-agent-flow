@@ -1,10 +1,8 @@
 
 import {
-  Activity,
   Bot,
   ClipboardList,
   LayoutDashboard,
-  ScrollText,
   Settings,
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
@@ -13,8 +11,6 @@ const navigation = [
   { label: "Overview", icon: LayoutDashboard, path: "/" },
   { label: "Agents", icon: Bot, path: "/agents" },
   { label: "Tasks", icon: ClipboardList, path: "/tasks" },
-  { label: "Executions", icon: Activity, path: "/executions" },
-  { label: "Logs", icon: ScrollText, path: "/logs" },
 ];
 
 const linkClasses = ({ isActive }: { isActive: boolean }) =>

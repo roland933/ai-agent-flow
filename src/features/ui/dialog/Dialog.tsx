@@ -9,7 +9,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-type DialogSize = "sm" | "md" | "lg" | "xl";
+type DialogSize = "sm" | "md" | "lg" | "xl" | "2xl";
 
 type AppDialogProps = {
   open: boolean;
@@ -26,6 +26,7 @@ const sizeStyles: Record<DialogSize, string> = {
   md: "!max-w-xl",
   lg: "!max-w-2xl",
   xl: "!max-w-4xl",
+ "2xl": "!max-w-6xl",
 };
 
 export function Dialog({
@@ -40,7 +41,7 @@ export function Dialog({
   return (
     <ShadcnDialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className={`!w-[calc(100%-2rem)] ${sizeStyles[size]} max-h-[85vh] overflow-y-auto rounded-2xl border border-white/[0.10] bg-[#101a20] p-6 text-slate-100 shadow-2xl shadow-black/30 sm:p-8`}
+        className={`!w-[calc(100%-2rem)] ${sizeStyles[size]} max-h-[85vh] overflow-y-auto rounded-2xl border border-white/[0.10] bg-[#0B0D12] p-6 text-slate-100 shadow-2xl shadow-black/30 sm:p-8`}
       >
         <DialogHeader className="mb-2 space-y-2">
           <DialogTitle className="text-xl font-semibold tracking-tight text-slate-100">
