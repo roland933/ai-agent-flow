@@ -1,8 +1,12 @@
 
 import type { Dispatch, SetStateAction } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import type { Workflow } from "../types/workflow";
 import type { CreateWorkflowData } from "../components/CreateWorkflowDialog";
+import type { WorkflowTemplateCreateRequest } from "../types/workflow-api";
+
+import { workflowMutations } from "../queries/workflow-mutations";
 
 interface UseWorkflowActionsProps {
   setWorkflows: Dispatch<SetStateAction<Workflow[]>>;
@@ -15,25 +19,35 @@ export function useWorkflowActions({
   setExpandedIds,
   setCurrentPage,
 }: UseWorkflowActionsProps) {
-  const handleCreateWorkflow = (data: CreateWorkflowData) => {
-    const id = Date.now();
+  const queryClient = useQueryClient();
 
-    const newWorkflow: Workflow = {
-      id,
+  const createMutation = useMutation({
+    ...workflowMutations.create(),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: ["workflows"],
+      });
+    },
+  });
+
+  const handleCreateWorkflow = async (data: CreateWorkflowData) => {
+    const payload: WorkflowTemplateCreateRequest = {
       name: data.name,
-      description: data.description,
-      taskTitle: data.taskTitle,
-      taskDescription: data.taskDescription,
-      outputName: data.outputName,
-      outputDescription: data.outputDescription,
-      outputFormat: data.outputFormat,
-      taskStatus: "draft",
+      description: data.description || null,
+      task_title: data.taskTitle,
+      task_description: data.taskDescription || null,
+      output_name: data.outputName,
+      output_description: data.outputDescription || null,
+      output_format: data.outputFormat,
       assignments: [],
     };
 
-    setWorkflows((current) => [newWorkflow, ...current]);
+    const created = await createMutation.mutateAsync(payload);
+
     setCurrentPage(1);
-    setExpandedIds((current) => [id, ...current]);
+    setExpandedIds((current) => [created.id, ...current]);
+
+    return created;
   };
 
   const handleDuplicate = (workflow: Workflow) => {
@@ -70,5 +84,7 @@ export function useWorkflowActions({
     handleCreateWorkflow,
     handleDuplicate,
     handleDelete,
+    isCreating: createMutation.isPending,
+    createError: createMutation.error,
   };
 }

@@ -3,33 +3,52 @@ import { useState } from "react";
 
 import { Dialog } from "@/features/ui/dialog/Dialog";
 import { Button } from "@/features/ui/button/Button";
+import FormField from "@/components/common/ui/form/FormField";
+
 import {
     Tabs,
     TabsContent,
     TabsList,
     TabsTrigger,
 } from "@/components/ui/tabs";
+import type { CreateWorkflowData } from "../types/workflow";
 
 type CreateWorkflowDialogProps = {
     open: boolean;
     onOpenChange: (open: boolean) => void;
-    onSubmit: (data: CreateWorkflowData) => void;
+    onSubmit: (data: CreateWorkflowData) => void | Promise<void>;
+    isSubmitting?: boolean;
+    error?: string | null;
 };
 
-export type CreateWorkflowData = {
-    name: string;
+const outputFormats: {
+    value: CreateWorkflowData["outputFormat"];
+    label: string;
     description: string;
-    taskTitle: string;
-    taskDescription: string;
-    outputName: string;
-    outputDescription: string;
-    outputFormat: "markdown" | "json" | "text";
-};
+}[] = [
+        {
+            value: "markdown",
+            label: "Markdown",
+            description: "Formatted document",
+        },
+        {
+            value: "json",
+            label: "JSON",
+            description: "Structured data",
+        },
+        {
+            value: "text",
+            label: "Plain text",
+            description: "Simple text output",
+        },
+    ];
 
 export default function CreateWorkflowDialog({
     open,
     onOpenChange,
     onSubmit,
+    isSubmitting = false,
+    error,
 }: CreateWorkflowDialogProps) {
     const [activeTab, setActiveTab] = useState("general");
 
@@ -44,38 +63,33 @@ export default function CreateWorkflowDialog({
     const [outputFormat, setOutputFormat] =
         useState<CreateWorkflowData["outputFormat"]>("markdown");
 
-    const handleSubmit = () => {
-        if (!name.trim() || !taskTitle.trim() || !outputName.trim()) {
+    const handleSubmit = async () => {
+        if (!name.trim() || !taskTitle.trim() || !outputName.trim() || isSubmitting) {
             return;
         }
 
-        onSubmit({
+        await onSubmit({
             name: name.trim(),
-            description: description.trim(),
+            description: description?.trim(),
             taskTitle: taskTitle.trim(),
-            taskDescription: taskDescription.trim(),
+            taskDescription: taskDescription?.trim(),
             outputName: outputName.trim(),
-            outputDescription: outputDescription.trim(),
+            outputDescription: outputDescription?.trim(),
             outputFormat,
         });
     };
-
-    const inputClassName =
-        "w-full rounded-md border border-slate-700 bg-slate-900 px-3 py-2.5 text-sm text-white outline-none transition-colors focus:border-purple-500";
-
-    const labelClassName = "text-sm font-medium text-slate-200 ";
 
     return (
         <Dialog
             open={open}
             onOpenChange={onOpenChange}
             title="Create workflow"
-
             size="2xl"
             footer={
                 <Button
-                    title="Create workflow"
+                    title={isSubmitting ? "Creating..." : "Create workflow"}
                     onClick={handleSubmit}
+                    disabled={isSubmitting}
                 />
             }
         >
@@ -92,7 +106,7 @@ export default function CreateWorkflowDialog({
                 <TabsContent value="general">
                     <div className="space-y-8 py-3">
 
-                        {/* GENERAL INFORMATION */}
+                        {/* GENERAL */}
                         <section className="space-y-4">
                             <div>
                                 <h3 className="text-base font-semibold text-white">
@@ -103,31 +117,29 @@ export default function CreateWorkflowDialog({
                                 </p>
                             </div>
 
-                            <div className="space-y-1.5">
-                                <label className={labelClassName}>
-                                    Workflow name
-                                </label>
-                                <input
-                                    value={name}
-                                    onChange={(e) => setName(e.target.value)}
-                                    placeholder="e.g. Content research workflow"
-                                    className={inputClassName}
-                                />
-                            </div>
+                            <FormField
+                                label="Workflow name"
+                                value={name}
+                                onChange={setName}
+                                placeholder="e.g. Content research workflow"
+                                required
+                            />
 
-                            <div className="space-y-1.5">
-                                <label className={labelClassName}>
-                                    Description
-                                </label>
-                                <textarea
-                                    value={description}
-                                    onChange={(e) => setDescription(e.target.value)}
-                                    placeholder="Describe what this workflow does..."
-                                    rows={3}
-                                    className={`${inputClassName} resize-none`}
-                                />
-                            </div>
+                            <FormField
+                                label="Description"
+                                value={description}
+                                onChange={setDescription}
+                                placeholder="Describe what this workflow does..."
+                                multiline
+                                rows={3}
+                            />
                         </section>
+
+                        {error && (
+                            <div className="rounded-lg border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+                                {error}
+                            </div>
+                        )}
 
                         <div className="border-t border-slate-800" />
 
@@ -142,30 +154,22 @@ export default function CreateWorkflowDialog({
                                 </p>
                             </div>
 
-                            <div className="space-y-1.5">
-                                <label className={labelClassName}>
-                                    Task title
-                                </label>
-                                <input
-                                    value={taskTitle}
-                                    onChange={(e) => setTaskTitle(e.target.value)}
-                                    placeholder="e.g. Research a topic"
-                                    className={inputClassName}
-                                />
-                            </div>
+                            <FormField
+                                label="Task title"
+                                value={taskTitle}
+                                onChange={setTaskTitle}
+                                placeholder="e.g. Research a topic"
+                                required
+                            />
 
-                            <div className="space-y-1.5">
-                                <label className={labelClassName}>
-                                    Task description
-                                </label>
-                                <textarea
-                                    value={taskDescription}
-                                    onChange={(e) => setTaskDescription(e.target.value)}
-                                    placeholder="Describe what the agents should accomplish..."
-                                    rows={4}
-                                    className={`${inputClassName} resize-none`}
-                                />
-                            </div>
+                            <FormField
+                                label="Task description"
+                                value={taskDescription}
+                                onChange={setTaskDescription}
+                                placeholder="Describe what the agents should accomplish..."
+                                multiline
+                                rows={4}
+                            />
                         </section>
 
                         <div className="border-t border-slate-800" />
@@ -181,74 +185,51 @@ export default function CreateWorkflowDialog({
                                 </p>
                             </div>
 
-                            <div className="space-y-1.5">
-                                <label className={labelClassName}>
-                                    Output name
-                                </label>
-                                <input
-                                    value={outputName}
-                                    onChange={(e) => setOutputName(e.target.value)}
-                                    placeholder="e.g. Research Report"
-                                    className={inputClassName}
-                                />
-                            </div>
+                            <FormField
+                                label="Output name"
+                                value={outputName}
+                                onChange={setOutputName}
+                                placeholder="e.g. Research Report"
+                                required
+                            />
 
-                            <div className="space-y-1.5">
-                                <label className={labelClassName}>
-                                    Expected content
-                                </label>
-                                <textarea
-                                    value={outputDescription}
-                                    onChange={(e) => setOutputDescription(e.target.value)}
-                                    placeholder="Describe the expected final output..."
-                                    rows={3}
-                                    className={`${inputClassName} resize-none`}
-                                />
-                            </div>
+                            <FormField
+                                label="Expected content"
+                                value={outputDescription}
+                                onChange={setOutputDescription}
+                                placeholder="Describe the expected final output..."
+                                multiline
+                                rows={3}
+                            />
 
-
-                            <div className="space-y-2">
-                                <label className={labelClassName}>
+                            {/* OUTPUT FORMAT */}
+                            <div className="flex flex-col gap-3">
+                                <label className="text-sm font-medium text-slate-200">
                                     Output format
                                 </label>
 
                                 <div className="grid grid-cols-3 gap-3">
-                                    {[
-                                        {
-                                            value: "markdown",
-                                            label: "Markdown",
-                                            description: "Formatted document",
-                                        },
-                                        {
-                                            value: "json",
-                                            label: "JSON",
-                                            description: "Structured data",
-                                        },
-                                        {
-                                            value: "text",
-                                            label: "Plain text",
-                                            description: "Simple text output",
-                                        },
-                                    ].map((format) => {
-                                        const isSelected = outputFormat === format.value;
+                                    {outputFormats.map((format) => {
+                                        const isSelected =
+                                            outputFormat === format.value;
 
                                         return (
                                             <button
                                                 key={format.value}
                                                 type="button"
                                                 onClick={() =>
-                                                    setOutputFormat(
-                                                        format.value as CreateWorkflowData["outputFormat"]
-                                                    )
+                                                    setOutputFormat(format.value)
                                                 }
-                                                className={`rounded-xl border p-4 text-left transition-all ${isSelected
-                                                        ? "border-purple-500 bg-purple-500/10"
-                                                        : "border-slate-700 bg-slate-900 hover:border-slate-500"
+                                                className={`hover:cursor-pointer rounded-xl border p-4 text-left transition-all ${isSelected
+                                                    ? "border-purple-500 bg-purple-500/10"
+                                                    : "border-slate-700 bg-[#121621] hover:border-slate-500"
                                                     }`}
                                             >
                                                 <div className="mb-3 flex items-center justify-between">
                                                     <span
-                                                        className={`text-sm font-medium ${isSelected ? "text-purple-300" : "text-slate-200"
+                                                        className={`text-sm font-medium ${isSelected
+                                                            ? "text-purple-300"
+                                                            : "text-slate-200"
                                                             }`}
                                                     >
                                                         {format.label}
@@ -256,8 +237,8 @@ export default function CreateWorkflowDialog({
 
                                                     <span
                                                         className={`flex size-4 items-center justify-center rounded-full border ${isSelected
-                                                                ? "border-purple-500"
-                                                                : "border-slate-500"
+                                                            ? "border-purple-500"
+                                                            : "border-slate-500"
                                                             }`}
                                                     >
                                                         {isSelected && (
@@ -274,7 +255,6 @@ export default function CreateWorkflowDialog({
                                     })}
                                 </div>
                             </div>
-
                         </section>
                     </div>
                 </TabsContent>

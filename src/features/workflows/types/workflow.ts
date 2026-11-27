@@ -34,3 +34,16 @@ export interface Workflow {
   outputDescription: string;
   outputFormat: OutputFormat;
 }
+
+
+export interface CreateWorkflowData  {
+    name: string;
+    description: string;
+    taskTitle: string;
+    taskDescription: string;
+    outputName: string;
+    outputDescription: string;
+    outputFormat: "markdown" | "json" | "text";
+
+    error?: string | null;
+};

@@ -60,15 +60,17 @@ export default function Overview() {
   } = useWorkflowPagination(workflows);
 
 
-  const {
-    handleCreateWorkflow,
-    handleDuplicate,
-    handleDelete,
-  } = useWorkflowActions({
-    setWorkflows,
-    setExpandedIds,
-    setCurrentPage,
-  });
+const {
+  handleCreateWorkflow,
+  handleDuplicate,
+  handleDelete,
+  isCreating,
+  createError,
+} = useWorkflowActions({
+  setWorkflows,
+  setExpandedIds,
+  setCurrentPage,
+});
 
 
   const {
@@ -152,10 +154,10 @@ export default function Overview() {
 
           <button
             onClick={() => setCreateWorkflowDialogOpen(true)}
-            className="hover:cursor-pointer flex items-center gap-2 rounded-xl bg-[#8B7CF6] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#7969E8]"
+            className="hover:cursor-pointer flex items-center  rounded-xl bg-[#8B7CF6] hover:bg-[#7969E8] px-4 py-2.5 text-sm font-medium text-white transition-colors "
           >
-            <Plus size={17} />
-            Create workflow
+            <Plus size={19} />
+         
           </button>
         </div>
 
@@ -163,9 +165,15 @@ export default function Overview() {
         <CreateWorkflowDialog
           open={createWorkflowDialogOpen}
           onOpenChange={setCreateWorkflowDialogOpen}
-          onSubmit={(data) => {
-            handleCreateWorkflow(data);
-            setCreateWorkflowDialogOpen(false);
+          isSubmitting={isCreating}
+          error={createError instanceof Error ? createError.message : null}
+          onSubmit={async (data) => {
+            try {
+              await handleCreateWorkflow(data);
+              setCreateWorkflowDialogOpen(false);
+            } catch {
+             
+            }
           }}
         />
 
